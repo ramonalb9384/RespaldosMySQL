@@ -36,18 +36,18 @@ Antes de compilar y ejecutar la aplicación, asegúrate de tener instalado lo si
 
 *   **Visual Studio**: Para abrir y compilar la solución.
 *   **.NET Framework**: La versión compatible con el proyecto (generalmente 4.8 o superior para proyectos de escritorio modernos).
-*   **MySQL Server**: Con la herramienta `mysqldump` disponible. Asegúrate de que `mysqldump.exe` esté en la variable de entorno PATH del sistema o especifica su ruta completa en la configuración global de la aplicación.
-*   **7-Zip**: Asegúrate de que el ejecutable `7z.exe` esté en la variable de entorno PATH del sistema o especifica su ruta completa en la configuración global de la aplicación.
+*   **MySQL CLient**: Con la herramienta `mysqldump` disponible. Asegúrate de que `mysqldump.exe` esté especificada su ruta completa en la configuración global de la aplicación.
+*   **7-Zip**: Asegúrate de que el ejecutable `7z.exe` esté especificada su ruta completa en la configuración global de la aplicación.
 *   **Privilegios de Administrador**: Para instalar, desinstalar, iniciar o detener el servicio de Windows, la aplicación `RespaldosMysqlUI` debe ejecutarse con privilegios de administrador.
 
 ## Configuración e Instalación
 
 1.  **Clonar el Repositorio**:
     ```bash
-    git clone <URL_DEL_REPOSITORIO>
+    git clone https://github.com/ramonalb9384/RespaldosMySQL
     cd RespaldosMysql
     ```
-    *(Reemplaza `<URL_DEL_REPOSITORIO>` con la URL real de tu repositorio Git.)*
+  
 
 2.  **Abrir en Visual Studio**:
     Abre el archivo de solución `RespaldosMysql.sln` en Visual Studio.
