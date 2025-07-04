@@ -1,0 +1,51 @@
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.sln.docstates
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+*.exe
+*.pdb
+*.dll
+*.obj
+*.lib
+*.exp
+
+# Project files
+*.csproj
+*.vbproj
+*.fsproj
+*.sqlproj
+
+# Visual Studio Code
+.vscode/
+
+# NuGet packages
+packages/
+*.nupkg
+
+# Resharper
+*.resharper
+*.DotSettings
+
+# NCrunch
+_NCrunch_*
+
+# Test results
+TestResults/
+
+# Other
+*.log
+*.bak
+*.tmp
+
+# My specific additions based on your project structure
+RespaldosMysqlLibrary/bin/
+RespaldosMysqlLibrary/obj/
+RespaldosMysqlService/bin/
+RespaldosMysqlService/obj/
+RespaldosMysqlUI/bin/
+RespaldosMysqlUI/obj/
