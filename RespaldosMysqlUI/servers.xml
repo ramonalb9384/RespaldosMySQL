@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Servers>
+  <!--
+    Este archivo contiene la configuración de los servidores MySQL para respaldar.
+  -->
+  <Server>
+    <Name>Servidor de Ejemplo</Name>
+    <IP>127.0.0.1</IP>
+    <Port>3306</Port>
+    <User>root</User>
+    <Password>password_placeholder</Password>
+    <Databases>
+      <Database>mysql</Database>
+      <Database>test</Database>
+    </Databases>
+    <ExcludedDatabases>
+      <Database>information_schema</Database>
+      <Database>performance_schema</Database>
+      <Database>sys</Database>
+      <Database>mysql</Database>
+    </ExcludedDatabases>
+    <Schedule>
+      <Enabled>false</Enabled>
+      <Days>Lunes,Martes,Miércoles,Jueves,Viernes</Days>
+      <Time>22:00</Time>
+    </Schedule>
+  </Server>
+</Servers>

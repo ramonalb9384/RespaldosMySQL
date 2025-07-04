@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.32126.315
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "RespaldosMysqlService", "RespaldosMysqlService\RespaldosMysqlService.vbproj", "{DF662D3D-609C-43A0-97BD-BAC13EC9684D}"
+EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "RespaldosMysqlLibrary", "RespaldosMysqlLibrary\RespaldosMysqlLibrary.vbproj", "{F5C47C09-D404-4277-831A-D5073BA2A492}"
+EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "RespaldosMysqlUI", "RespaldosMysqlUI\RespaldosMysqlUI.vbproj", "{09D81A58-AEC8-4382-81C2-20FCF860B9D1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DF662D3D-609C-43A0-97BD-BAC13EC9684D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF662D3D-609C-43A0-97BD-BAC13EC9684D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF662D3D-609C-43A0-97BD-BAC13EC9684D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF662D3D-609C-43A0-97BD-BAC13EC9684D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5C47C09-D404-4277-831A-D5073BA2A492}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5C47C09-D404-4277-831A-D5073BA2A492}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5C47C09-D404-4277-831A-D5073BA2A492}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5C47C09-D404-4277-831A-D5073BA2A492}.Release|Any CPU.Build.0 = Release|Any CPU
+		{09D81A58-AEC8-4382-81C2-20FCF860B9D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09D81A58-AEC8-4382-81C2-20FCF860B9D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09D81A58-AEC8-4382-81C2-20FCF860B9D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09D81A58-AEC8-4382-81C2-20FCF860B9D1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {37468530-FEB4-424A-810A-0106B234EAD0}
+	EndGlobalSection
+EndGlobal

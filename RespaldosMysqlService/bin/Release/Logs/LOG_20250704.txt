@@ -1,0 +1,1 @@
+[2025-07-04 12:29:46] [SERVICE_LIFECYCLE] Iniciando servicio de respaldo MySQL
