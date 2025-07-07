@@ -18,6 +18,8 @@
 *   **Interfaz de Usuario Intuitiva**: Gestión sencilla de servidores y configuración a través de una aplicación de escritorio.
 *   **Control del Servicio**: Instala, desinstala, inicia y detiene el servicio de Windows directamente desde la UI.
 *   **Monitoreo en Tiempo Real**: Visualiza el log de actividad del servicio en un `TextBox` en la UI, con actualización automática tipo "tail -f".
+*   **Detección y Ejecución de Respaldos Omitidos**: El servicio detecta si un respaldo programado se omitió (por ejemplo, si el servidor estuvo apagado) y lo ejecuta automáticamente al iniciar, respetando una ventana de no respaldo configurable.
+*   **Ventana de No Respaldo**: Permite definir un horario durante el cual los respaldos omitidos no se ejecutarán, evitando así la sobrecarga del sistema en horas críticas.
 *   **Manejo Seguro de Credenciales**: Las cadenas de conexión se construyen de forma segura utilizando `MySqlConnectionStringBuilder` para manejar correctamente caracteres especiales en las contraseñas.
 
 ## Tecnologías Utilizadas
@@ -36,8 +38,8 @@ Antes de compilar y ejecutar la aplicación, asegúrate de tener instalado lo si
 
 *   **Visual Studio**: Para abrir y compilar la solución.
 *   **.NET Framework**: La versión compatible con el proyecto (generalmente 4.8 o superior para proyectos de escritorio modernos).
-*   **MySQL CLient**: Con la herramienta `mysqldump` disponible. Asegúrate de que `mysqldump.exe` esté especificada su ruta completa en la configuración global de la aplicación.
-*   **7-Zip**: Asegúrate de que el ejecutable `7z.exe` esté especificada su ruta completa en la configuración global de la aplicación.
+*   **MySQL Client**: Con la herramienta `mysqldump` disponible.
+*   **7-Zip**: Asegúrate de que el ejecutable `7z.exe` esté en la variable de entorno PATH del sistema o especifica su ruta completa en la configuración global de la aplicación.
 *   **Privilegios de Administrador**: Para instalar, desinstalar, iniciar o detener el servicio de Windows, la aplicación `RespaldosMysqlUI` debe ejecutarse con privilegios de administrador.
 
 ## Configuración e Instalación
@@ -47,7 +49,7 @@ Antes de compilar y ejecutar la aplicación, asegúrate de tener instalado lo si
     git clone https://github.com/ramonalb9384/RespaldosMySQL
     cd RespaldosMysql
     ```
-  
+    *(Reemplaza `<URL_DEL_REPOSITORIO>` con la URL real de tu repositorio Git.)*
 
 2.  **Abrir en Visual Studio**:
     Abre el archivo de solución `RespaldosMysql.sln` en Visual Studio.
@@ -59,7 +61,7 @@ Antes de compilar y ejecutar la aplicación, asegúrate de tener instalado lo si
     El archivo de configuración `servers.xml` se encuentra en la misma carpeta que el ejecutable de la UI (`RespaldosMysqlUI\bin\Debug\servers.xml`) y el servicio (`RespaldosMysqlService\bin\Debug\servers.xml`).
     *   Si el archivo no existe, la aplicación creará uno por defecto con un servidor de ejemplo.
     *   Puedes editar este archivo manualmente o, preferiblemente, usar la interfaz de usuario para gestionar los servidores.
-    *   **Importante**: Asegúrate de que las rutas a `mysqldump.exe` y `7z.exe` en la sección `<GlobalSettings>` de `servers.xml` sean correctas para tu sistema.
+    *   **Importante**: Asegúrate de que las rutas a `mysqldump.exe` y `7z.exe` en la sección `<GlobalSettings>` de `servers.xml` sean correctas para tu sistema. También puedes configurar la `NoBackupWindow` (ventana de no respaldo) en la sección de configuración global de la aplicación para evitar que los respaldos omitidos se ejecuten en horarios específicos.
 
 5.  **Instalar el Servicio de Windows**:
     *   Ejecuta `RespaldosMysqlUI.exe` **como administrador**.
@@ -98,12 +100,22 @@ El usuario MySQL configurado para los respaldos debe tener los siguientes privil
 -- Crea el usuario (si no existe)
 CREATE USER 'backup_user'@'localhost' IDENTIFIED BY 'your_password';
 
--- Otorga los privilegios necesarios
-GRANT SELECT, LOCK TABLES, RELOAD, SHOW DATABASES, PROCESS ON *.* TO 'backup_user'@'localhost';
+-- Otorga los privilegios necesarios para mysqldump
+-- SELECT: Para leer datos de las tablas.
+-- LOCK TABLES: Para bloquear tablas durante el respaldo (si no se usa --single-transaction).
+-- RELOAD (o SUPER): Necesario para FLUSH TABLES WITH READ LOCK (si se usa --single-transaction o --master-data).
+-- SHOW DATABASES: Para listar las bases de datos.
+-- PROCESS: Para ver los procesos de MySQL (útil para mysqldump).
+-- CREATE TEMPORARY TABLES: Necesario para algunas operaciones internas de mysqldump.
+-- EVENT: Si tienes eventos programados en MySQL y quieres que mysqldump los incluya.
+GRANT SELECT, LOCK TABLES, RELOAD, SHOW DATABASES, PROCESS, CREATE TEMPORARY TABLES, SHOW VIEW, TRIGGER, EVENT ON *.* TO 'backup_user'@'localhost';
 
 -- Recarga los privilegios
 FLUSH PRIVILEGES;
 ```
+
+**Nota sobre el privilegio `RELOAD` / `SUPER`:**
+Si `mysqldump` se ejecuta con la opción `--single-transaction` (recomendado para bases de datos InnoDB para respaldos sin bloqueo) o `--master-data`, puede que necesite el privilegio `RELOAD` o `SUPER` para ejecutar `FLUSH TABLES WITH READ LOCK`. Si encuentras errores de permisos relacionados con `FLUSH TABLES`, asegúrate de que el usuario tenga `RELOAD` o considera otorgar `SUPER` (con precaución, ya que `SUPER` otorga muchos privilegios).
 *   Reemplaza `'backup_user'` y `'your_password'` con tus credenciales.
 *   Ajusta `'localhost'` a la IP o nombre de host desde donde se conectará tu aplicación/servicio. Usa `'%'` si la conexión puede venir de cualquier host (menos seguro).
 
@@ -122,6 +134,38 @@ FLUSH PRIVILEGES;
 *   **`mysqldump` o `7z.exe` no encontrados**:
     *   Verifica las rutas configuradas en la sección de configuración global de la aplicación.
     *   Asegúrate de que los ejecutables existan en esas rutas.
+
+## Manejo de Contraseñas y Seguridad
+
+Las contraseñas de los servidores MySQL configurados en la aplicación se almacenan en el archivo `servers.xml` de forma **encriptada**. La encriptación se realiza utilizando `System.Security.Cryptography.ProtectedData` con `DataProtectionScope.LocalMachine`. Esto significa que:
+
+*   Las contraseñas están protegidas contra la lectura directa del archivo.
+*   Solo pueden ser desencriptadas en la **misma máquina** donde fueron encriptadas y por el **mismo usuario** (o cualquier usuario si se usa `LocalMachine` y el contexto de la aplicación lo permite) que las encriptó. Esto proporciona una capa de seguridad razonable para la mayoría de los entornos de usuario único.
+
+**Consideraciones de Seguridad:**
+*   Aunque las contraseñas están encriptadas, el archivo `servers.xml` sigue siendo un recurso sensible. Asegúrate de que los permisos del sistema de archivos restrinjan el acceso a usuarios no autorizados.
+*   Si necesitas mover la configuración a otra máquina o a otro usuario, las contraseñas no podrán ser desencriptadas automáticamente. En ese caso, deberás reintroducirlas manualmente en la aplicación.
+
+## Exportar e Importar Configuración
+
+La aplicación permite exportar e importar la configuración de los servidores (incluyendo las contraseñas encriptadas) a un archivo `.encfg` (encrypted config). Esta funcionalidad es útil para:
+
+*   **Migrar configuraciones** entre diferentes instalaciones o usuarios (aunque las contraseñas deberán reintroducirse si se mueven a una máquina diferente).
+*   **Realizar copias de seguridad** de tu configuración.
+*   **Compartir configuraciones** de forma segura (siempre y cuando la contraseña de encriptación del archivo `.encfg` sea compartida de forma segura).
+
+**Proceso de Exportación:**
+1.  Haz clic en `Herramientas > Exportar/Importar > Exportar Configuración`.
+2.  Se te pedirá una contraseña para encriptar el archivo `.encfg`. Esta contraseña es **diferente** de las contraseñas de MySQL y se utiliza para proteger el archivo de exportación.
+3.  Guarda el archivo `.encfg` en la ubicación deseada.
+
+**Proceso de Importación:**
+1.  Haz clic en `Herramientas > Exportar/Importar > Importar Configuración`.
+2.  Selecciona el archivo `.encfg` que deseas importar.
+3.  Se te pedirá la contraseña que utilizaste para encriptar el archivo durante la exportación.
+4.  Una vez desencriptado, la configuración se cargará en la aplicación, sobrescribiendo la configuración actual. Las contraseñas de MySQL se desencriptarán si la importación se realiza en la misma máquina y por el mismo usuario; de lo contrario, deberás reintroducirlas.
+
+**Nota:** La importación de configuración requiere privilegios de administrador para asegurar que la aplicación pueda escribir en la ubicación del archivo `servers.xml` y manejar la encriptación/desencriptación de forma segura.
 
 ## Contribuciones
 
