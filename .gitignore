@@ -49,3 +49,6 @@ RespaldosMysqlService/bin/
 RespaldosMysqlService/obj/
 RespaldosMysqlUI/bin/
 RespaldosMysqlUI/obj/
+
+# Temporary commit message file
+commit_message.txt
