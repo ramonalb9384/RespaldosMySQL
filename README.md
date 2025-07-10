@@ -16,11 +16,12 @@
 *   **Exclusión de Bases de Datos**: Posibilidad de excluir bases de datos específicas del proceso de respaldo.
 *   **Compresión de Respaldos**: Los archivos de respaldo SQL se comprimen automáticamente utilizando 7-Zip para ahorrar espacio.
 *   **Interfaz de Usuario Intuitiva**: Gestión sencilla de servidores y configuración a través de una aplicación de escritorio.
+*   **Interfaz de Usuario Nítida**: Soporte para pantallas de alta resolución (High-DPI) para una visualización clara y sin borrosidad.
 *   **Control del Servicio**: Instala, desinstala, inicia y detiene el servicio de Windows directamente desde la UI.
 *   **Monitoreo en Tiempo Real**: Visualiza el log de actividad del servicio en un `TextBox` en la UI, con actualización automática tipo "tail -f".
 *   **Detección y Ejecución de Respaldos Omitidos**: El servicio detecta si un respaldo programado se omitió (por ejemplo, si el servidor estuvo apagado) y lo ejecuta automáticamente al iniciar, respetando una ventana de no respaldo configurable.
 *   **Ventana de No Respaldo**: Permite definir un horario durante el cual los respaldos omitidos no se ejecutarán, evitando así la sobrecarga del sistema en horas críticas.
-*   **Manejo Seguro de Credenciales**: Las cadenas de conexión se construyen de forma segura utilizando `MySqlConnectionStringBuilder` para manejar correctamente caracteres especiales en las contraseñas.
+*   **Arquitectura Optimizada**: Lógica de gestión de servidores consolidada en `BackupManager` para una mayor eficiencia y mantenibilidad.
 
 ## Tecnologías Utilizadas
 
@@ -137,12 +138,14 @@ Si `mysqldump` se ejecuta con la opción `--single-transaction` (recomendado par
 
 ## Manejo de Contraseñas y Seguridad
 
-Las contraseñas de los servidores MySQL configurados en la aplicación se almacenan en el archivo `servers.xml` de forma **encriptada**. La encriptación se realiza utilizando `System.Security.Cryptography.ProtectedData` con `DataProtectionScope.LocalMachine`. Esto significa que:
+Las contraseñas de los servidores MySQL configurados en la aplicación se almacenan en el archivo `servers.xml` de forma **encriptada** y **nunca se exponen en los logs**.
+La encriptación se realiza utilizando `System.Security.Cryptography.ProtectedData` con `DataProtectionScope.LocalMachine`. Esto significa que:
 
 *   Las contraseñas están protegidas contra la lectura directa del archivo.
 *   Solo pueden ser desencriptadas en la **misma máquina** donde fueron encriptadas y por el **mismo usuario** (o cualquier usuario si se usa `LocalMachine` y el contexto de la aplicación lo permite) que las encriptó. Esto proporciona una capa de seguridad razonable para la mayoría de los entornos de usuario único.
 
-**Consideraciones de Seguridad:**
+**Consideraciones de Seguridad Adicionales:**
+*   Se implementa una **validación estricta de las entradas** en la interfaz de usuario y en la lógica de respaldo para prevenir ataques de inyección de comandos, asegurando que los datos de configuración sean seguros antes de ser utilizados en operaciones críticas.
 *   Aunque las contraseñas están encriptadas, el archivo `servers.xml` sigue siendo un recurso sensible. Asegúrate de que los permisos del sistema de archivos restrinjan el acceso a usuarios no autorizados.
 *   Si necesitas mover la configuración a otra máquina o a otro usuario, las contraseñas no podrán ser desencriptadas automáticamente. En ese caso, deberás reintroducirlas manualmente en la aplicación.
 
