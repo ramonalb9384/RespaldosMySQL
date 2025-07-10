@@ -43,10 +43,18 @@ Partial Class Form1
         Me.GroupBoxConfig = New System.Windows.Forms.GroupBox()
         Me.btnExportConfig = New System.Windows.Forms.Button()
         Me.btnImportConfig = New System.Windows.Forms.Button()
+        Me.btnAnadirEvento = New System.Windows.Forms.Button()
+        Me.btnEditarEvento = New System.Windows.Forms.Button()
+        Me.btnEliminarEvento = New System.Windows.Forms.Button()
+        Me.Label4 = New System.Windows.Forms.Label()
+        Me.grpEventos = New System.Windows.Forms.Panel()
+        Me.dgvEventos = New System.Windows.Forms.DataGridView()
         CType(Me.dgvServers, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.GroupBox1.SuspendLayout()
         Me.StatusStrip1.SuspendLayout()
         Me.GroupBoxConfig.SuspendLayout()
+        Me.grpEventos.SuspendLayout()
+        CType(Me.dgvEventos, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'dgvServers
@@ -57,7 +65,7 @@ Partial Class Form1
         Me.dgvServers.Margin = New System.Windows.Forms.Padding(4)
         Me.dgvServers.Name = "dgvServers"
         Me.dgvServers.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders
-        Me.dgvServers.Size = New System.Drawing.Size(912, 203)
+        Me.dgvServers.Size = New System.Drawing.Size(616, 203)
         Me.dgvServers.TabIndex = 0
         '
         'btnAdd
@@ -65,39 +73,39 @@ Partial Class Form1
         Me.btnAdd.Location = New System.Drawing.Point(16, 358)
         Me.btnAdd.Margin = New System.Windows.Forms.Padding(4)
         Me.btnAdd.Name = "btnAdd"
-        Me.btnAdd.Size = New System.Drawing.Size(140, 37)
+        Me.btnAdd.Size = New System.Drawing.Size(100, 37)
         Me.btnAdd.TabIndex = 1
         Me.btnAdd.Text = "Añadir"
         Me.btnAdd.UseVisualStyleBackColor = True
         '
         'btnEdit
         '
-        Me.btnEdit.Location = New System.Drawing.Point(164, 358)
+        Me.btnEdit.Location = New System.Drawing.Point(124, 358)
         Me.btnEdit.Margin = New System.Windows.Forms.Padding(4)
         Me.btnEdit.Name = "btnEdit"
-        Me.btnEdit.Size = New System.Drawing.Size(140, 37)
+        Me.btnEdit.Size = New System.Drawing.Size(100, 37)
         Me.btnEdit.TabIndex = 2
         Me.btnEdit.Text = "Editar"
         Me.btnEdit.UseVisualStyleBackColor = True
         '
         'btnDelete
         '
-        Me.btnDelete.Location = New System.Drawing.Point(312, 358)
+        Me.btnDelete.Location = New System.Drawing.Point(232, 358)
         Me.btnDelete.Margin = New System.Windows.Forms.Padding(4)
         Me.btnDelete.Name = "btnDelete"
-        Me.btnDelete.Size = New System.Drawing.Size(140, 37)
+        Me.btnDelete.Size = New System.Drawing.Size(100, 37)
         Me.btnDelete.TabIndex = 3
         Me.btnDelete.Text = "Eliminar"
         Me.btnDelete.UseVisualStyleBackColor = True
         '
         'btnBackupNow
         '
-        Me.btnBackupNow.Location = New System.Drawing.Point(648, 358)
+        Me.btnBackupNow.Location = New System.Drawing.Point(340, 359)
         Me.btnBackupNow.Margin = New System.Windows.Forms.Padding(4)
         Me.btnBackupNow.Name = "btnBackupNow"
-        Me.btnBackupNow.Size = New System.Drawing.Size(280, 37)
+        Me.btnBackupNow.Size = New System.Drawing.Size(292, 37)
         Me.btnBackupNow.TabIndex = 4
-        Me.btnBackupNow.Text = "Respaldar Seleccionado Ahora"
+        Me.btnBackupNow.Text = "Respaldar Ahora el Servidor Seleccionado"
         Me.btnBackupNow.UseVisualStyleBackColor = True
         '
         'Label1
@@ -112,7 +120,7 @@ Partial Class Form1
         '
         'btnSettings
         '
-        Me.btnSettings.Location = New System.Drawing.Point(177, 51)
+        Me.btnSettings.Location = New System.Drawing.Point(177, 47)
         Me.btnSettings.Margin = New System.Windows.Forms.Padding(4)
         Me.btnSettings.Name = "btnSettings"
         Me.btnSettings.Size = New System.Drawing.Size(121, 37)
@@ -183,7 +191,7 @@ Partial Class Form1
         '
         Me.txtLogOutput.Location = New System.Drawing.Point(12, 453)
         Me.txtLogOutput.Name = "txtLogOutput"
-        Me.txtLogOutput.Size = New System.Drawing.Size(916, 179)
+        Me.txtLogOutput.Size = New System.Drawing.Size(1162, 179)
         Me.txtLogOutput.TabIndex = 11
         Me.txtLogOutput.Text = ""
         '
@@ -203,7 +211,7 @@ Partial Class Form1
         Me.StatusStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.lblProgressStatus, Me.ProgressBar1})
         Me.StatusStrip1.Location = New System.Drawing.Point(0, 659)
         Me.StatusStrip1.Name = "StatusStrip1"
-        Me.StatusStrip1.Size = New System.Drawing.Size(941, 22)
+        Me.StatusStrip1.Size = New System.Drawing.Size(1185, 22)
         Me.StatusStrip1.TabIndex = 13
         Me.StatusStrip1.Text = "StatusStrip1"
         '
@@ -225,7 +233,7 @@ Partial Class Form1
         Me.GroupBoxConfig.Controls.Add(Me.btnExportConfig)
         Me.GroupBoxConfig.Controls.Add(Me.btnImportConfig)
         Me.GroupBoxConfig.Controls.Add(Me.btnSettings)
-        Me.GroupBoxConfig.Location = New System.Drawing.Point(619, 12)
+        Me.GroupBoxConfig.Location = New System.Drawing.Point(865, 12)
         Me.GroupBoxConfig.Name = "GroupBoxConfig"
         Me.GroupBoxConfig.Size = New System.Drawing.Size(309, 109)
         Me.GroupBoxConfig.TabIndex = 10
@@ -234,7 +242,7 @@ Partial Class Form1
         '
         'btnExportConfig
         '
-        Me.btnExportConfig.Location = New System.Drawing.Point(14, 50)
+        Me.btnExportConfig.Location = New System.Drawing.Point(14, 47)
         Me.btnExportConfig.Name = "btnExportConfig"
         Me.btnExportConfig.Size = New System.Drawing.Size(75, 37)
         Me.btnExportConfig.TabIndex = 0
@@ -243,18 +251,85 @@ Partial Class Form1
         '
         'btnImportConfig
         '
-        Me.btnImportConfig.Location = New System.Drawing.Point(95, 51)
+        Me.btnImportConfig.Location = New System.Drawing.Point(95, 47)
         Me.btnImportConfig.Name = "btnImportConfig"
         Me.btnImportConfig.Size = New System.Drawing.Size(75, 37)
         Me.btnImportConfig.TabIndex = 1
         Me.btnImportConfig.Text = "Importar"
         Me.btnImportConfig.UseVisualStyleBackColor = True
         '
+        'btnAnadirEvento
+        '
+        Me.btnAnadirEvento.Location = New System.Drawing.Point(12, 236)
+        Me.btnAnadirEvento.Name = "btnAnadirEvento"
+        Me.btnAnadirEvento.Size = New System.Drawing.Size(128, 36)
+        Me.btnAnadirEvento.TabIndex = 15
+        Me.btnAnadirEvento.Text = "Añadir Evento"
+        Me.btnAnadirEvento.UseVisualStyleBackColor = True
+        '
+        'btnEditarEvento
+        '
+        Me.btnEditarEvento.Location = New System.Drawing.Point(146, 235)
+        Me.btnEditarEvento.Name = "btnEditarEvento"
+        Me.btnEditarEvento.Size = New System.Drawing.Size(128, 36)
+        Me.btnEditarEvento.TabIndex = 16
+        Me.btnEditarEvento.Text = "Editar Evento"
+        Me.btnEditarEvento.UseVisualStyleBackColor = True
+        '
+        'btnEliminarEvento
+        '
+        Me.btnEliminarEvento.Location = New System.Drawing.Point(280, 237)
+        Me.btnEliminarEvento.Name = "btnEliminarEvento"
+        Me.btnEliminarEvento.Size = New System.Drawing.Size(128, 34)
+        Me.btnEliminarEvento.TabIndex = 17
+        Me.btnEliminarEvento.Text = "Eliminar Evento"
+        Me.btnEliminarEvento.UseVisualStyleBackColor = True
+        '
+        'Label4
+        '
+        Me.Label4.AutoSize = True
+        Me.Label4.Location = New System.Drawing.Point(9, 0)
+        Me.Label4.Name = "Label4"
+        Me.Label4.Size = New System.Drawing.Size(328, 16)
+        Me.Label4.TabIndex = 18
+        Me.Label4.Text = "Respaldos por Evento para el Servidor Seleccionado"
+        '
+        'grpEventos
+        '
+        Me.grpEventos.Controls.Add(Me.dgvEventos)
+        Me.grpEventos.Controls.Add(Me.Label4)
+        Me.grpEventos.Controls.Add(Me.btnAnadirEvento)
+        Me.grpEventos.Controls.Add(Me.btnEliminarEvento)
+        Me.grpEventos.Controls.Add(Me.btnEditarEvento)
+        Me.grpEventos.Location = New System.Drawing.Point(639, 124)
+        Me.grpEventos.Name = "grpEventos"
+        Me.grpEventos.Size = New System.Drawing.Size(546, 291)
+        Me.grpEventos.TabIndex = 19
+        '
+        'dgvEventos
+        '
+        Me.dgvEventos.AllowUserToAddRows = False
+        Me.dgvEventos.AllowUserToDeleteRows = False
+        Me.dgvEventos.AllowUserToOrderColumns = True
+        Me.dgvEventos.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill
+        Me.dgvEventos.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
+        Me.dgvEventos.Location = New System.Drawing.Point(12, 24)
+        Me.dgvEventos.MultiSelect = False
+        Me.dgvEventos.Name = "dgvEventos"
+        Me.dgvEventos.ReadOnly = True
+        Me.dgvEventos.RowHeadersVisible = False
+        Me.dgvEventos.RowHeadersWidth = 51
+        Me.dgvEventos.RowTemplate.Height = 24
+        Me.dgvEventos.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect
+        Me.dgvEventos.Size = New System.Drawing.Size(522, 203)
+        Me.dgvEventos.TabIndex = 19
+        '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(941, 681)
+        Me.ClientSize = New System.Drawing.Size(1185, 681)
+        Me.Controls.Add(Me.grpEventos)
         Me.Controls.Add(Me.GroupBoxConfig)
         Me.Controls.Add(Me.StatusStrip1)
         Me.Controls.Add(Me.Label3)
@@ -278,6 +353,9 @@ Partial Class Form1
         Me.StatusStrip1.ResumeLayout(False)
         Me.StatusStrip1.PerformLayout()
         Me.GroupBoxConfig.ResumeLayout(False)
+        Me.grpEventos.ResumeLayout(False)
+        Me.grpEventos.PerformLayout()
+        CType(Me.dgvEventos, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -305,6 +383,10 @@ Partial Class Form1
     Friend WithEvents GroupBoxConfig As GroupBox
     Friend WithEvents btnExportConfig As Button
     Friend WithEvents btnImportConfig As Button
-
-
+    Friend WithEvents btnAnadirEvento As Button
+    Friend WithEvents btnEditarEvento As Button
+    Friend WithEvents btnEliminarEvento As Button
+    Friend WithEvents Label4 As Label
+    Friend WithEvents grpEventos As Panel
+    Friend WithEvents dgvEventos As DataGridView
 End Class

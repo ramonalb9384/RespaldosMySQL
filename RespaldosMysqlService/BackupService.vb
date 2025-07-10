@@ -83,11 +83,13 @@ Public Class BackupService
             Dim now As DateTime = DateTime.Now
             Dim currentDay As Integer = CInt(now.DayOfWeek)
             Dim currentTime As String = now.ToString("HH:mm")
+            Dim configChanged As Boolean = False ' Flag para indicar si la configuración ha cambiado
 
             For Each server As Server In servers
+                ' --- Procesar respaldos programados regulares ---
                 If server.Schedule.Enabled AndAlso server.Schedule.Days.Contains(currentDay) AndAlso server.Schedule.Time = currentTime Then
                     AppLogger.Log($"Respaldo programado activado para el servidor: {server.Name}.", "BACKUP_JOB")
-                    
+
                     Dim backupPath As String = backupManager.BackupDestinationPath
                     Dim backupThread As New Thread(Sub()
                                                        Try
@@ -103,7 +105,42 @@ Public Class BackupService
                                                    End Sub)
                     backupThread.Start()
                 End If
+
+                ' --- Procesar respaldos por evento ---
+                Dim eventosToRemove As New List(Of EventoRespaldo)
+                For Each evento As EventoRespaldo In server.Eventos.ToList() ' Usar ToList para permitir la modificación de la colección original
+                    If evento.FechaHora <= now Then
+                        AppLogger.Log($"Respaldo por evento activado para el servidor: {server.Name} (Evento: {evento.Descripcion}, Fecha: {evento.FechaHora}).", "EVENT_BACKUP_JOB")
+                        Dim backupPath As String = backupManager.BackupDestinationPath
+                        Dim backupThread As New Thread(Sub()
+                                                           Try
+                                                               Dim success As Boolean = backupManager.PerformBackup(server, backupPath, True)
+                                                               If success Then
+                                                                   AppLogger.Log($"Respaldo por evento para el servidor {server.Name} completado con éxito.", "EVENT_BACKUP_JOB")
+                                                               Else
+                                                                   AppLogger.Log($"Respaldo por evento para el servidor {server.Name} falló. Revise los logs de error para más detalles.", "ERROR")
+                                                               End If
+                                                           Catch exThread As Exception
+                                                               AppLogger.Log($"Excepción no controlada durante el respaldo por evento para {server.Name}: {exThread.Message}", "ERROR")
+                                                           End Try
+                                                       End Sub)
+                        backupThread.Start()
+                        eventosToRemove.Add(evento)
+                        configChanged = True ' Se ha procesado un evento, la configuración ha cambiado
+                    End If
+                Next
+
+                ' Eliminar eventos procesados
+                For Each evento As EventoRespaldo In eventosToRemove
+                    server.Eventos.Remove(evento)
+                    AppLogger.Log($"Evento de respaldo eliminado después de su procesamiento: {evento.Descripcion} para {server.Name}.", "EVENT_BACKUP_JOB")
+                Next
             Next
+
+            ' Guardar los cambios en la configuración SOLO si se procesó algún evento
+            If configChanged Then
+                backupManager.SaveServers(configFilePath)
+            End If
         Catch ex As Exception
             AppLogger.Log($"Error crítico en el ciclo del temporizador del servicio: {ex.Message}", "ERROR")
         Finally

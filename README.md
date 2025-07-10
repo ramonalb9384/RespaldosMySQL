@@ -11,10 +11,11 @@
 ## Características
 
 *   **Respaldo Automatizado**: El servicio de Windows realiza respaldos de MySQL de forma programada.
+*   **Respaldos por Evento**: Permite programar respaldos únicos para fechas y horas específicas, ideales para ventanas de mantenimiento o eventos puntuales.
 *   **Configuración Flexible**: Permite añadir múltiples servidores MySQL con configuraciones individuales.
 *   **Programación Detallada**: Define horarios específicos y días de la semana para cada respaldo.
 *   **Exclusión de Bases de Datos**: Posibilidad de excluir bases de datos específicas del proceso de respaldo.
-*   **Compresión de Respaldos**: Los archivos de respaldo SQL se comprimen automáticamente utilizando 7-Zip para ahorrar espacio.
+*   **Compresión de Respaldos**: Los archivos de respaldo SQL y ZIP se comprimen automáticamente utilizando 7-Zip para ahorrar espacio. Los archivos ZIP incluyen la fecha y hora (`YYMMDD_HHMM`) en su nombre para una mejor identificación.
 *   **Interfaz de Usuario Intuitiva**: Gestión sencilla de servidores y configuración a través de una aplicación de escritorio.
 *   **Interfaz de Usuario Nítida**: Soporte para pantallas de alta resolución (High-DPI) para una visualización clara y sin borrosidad.
 *   **Control del Servicio**: Instala, desinstala, inicia y detiene el servicio de Windows directamente desde la UI.

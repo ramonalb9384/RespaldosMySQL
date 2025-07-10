@@ -5,6 +5,7 @@ Imports System.IO
 Imports MySql.Data.MySqlClient
 Imports System.Linq
 Imports System.Text.RegularExpressions
+Imports System.Globalization
 
 ''' <summary>
 ''' Gestiona las operaciones de respaldo de bases de datos MySQL, incluyendo la conexión, ejecución de mysqldump, compresión y gestión de configuraciones.
@@ -186,7 +187,7 @@ Public Class BackupManager
 
             If allBackupsSuccessful Then
 
-                Dim zipFileName As String = $"{server.Name}_{server.IP}_{DateTime.Now.ToString("yyMMdd")}.zip"
+                Dim zipFileName As String = $"{server.Name}_{server.IP}_{DateTime.Now.ToString("yyMMdd_HHmm")}.zip"
                 Dim serverSpecificBackupRootPath As String = Path.Combine(backupPath, $"{server.Name}_{server.IP}")
                 Dim fullZipFilePath As String = Path.Combine(serverSpecificBackupRootPath, zipFileName)
 
@@ -377,6 +378,27 @@ Public Class BackupManager
                     server.IsPasswordEncrypted = False ' Valor por defecto si no se encuentra
                 End If
 
+                ' Cargar eventos de respaldo
+                Dim eventosNode As Xml.XmlNode = serverNode.SelectSingleNode("Eventos")
+                If eventosNode IsNot Nothing Then
+                    For Each eventoNode As Xml.XmlNode In eventosNode.SelectNodes("Evento")
+                        Try
+                            Dim evento As New EventoRespaldo()
+                            Dim fechaHoraString As String = eventoNode.SelectSingleNode("FechaHora").InnerText
+                            Dim fechaHora As DateTime
+                            If DateTime.TryParse(fechaHoraString, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, fechaHora) Then
+                                evento.FechaHora = fechaHora
+                                evento.Descripcion = eventoNode.SelectSingleNode("Descripcion").InnerText
+                                server.Eventos.Add(evento)
+                            Else
+                                AppLogger.Log($"Formato de FechaHora inválido ('{fechaHoraString}') para un evento en el servidor {server.Name}. Omitiendo evento.", "ADVERTENCIA")
+                            End If
+                        Catch ex As Exception
+                            AppLogger.Log($"Error al procesar un evento para el servidor {server.Name}: {ex.Message}. Omitiendo evento.", "ERROR")
+                        End Try
+                    Next
+                End If
+
                 _servers.Add(server)
             Next
 
@@ -464,7 +486,7 @@ Public Class BackupManager
         sevenZipPathNode.InnerText = Me.SevenZipPath
 
         ' Update or create EncryptPasswords
-        Dim encryptPasswordsNode As XmlNode = globalSettingsNode.SelectSingleNode("EncryptPasswords")
+        Dim encryptPasswordsNode As Xml.XmlNode = globalSettingsNode.SelectSingleNode("EncryptPasswords")
         If encryptPasswordsNode Is Nothing Then
             encryptPasswordsNode = doc.CreateElement("EncryptPasswords")
             globalSettingsNode.AppendChild(encryptPasswordsNode)
@@ -472,7 +494,7 @@ Public Class BackupManager
         encryptPasswordsNode.InnerText = Me.EncryptPasswords.ToString()
 
         ' Remove existing Server nodes before adding current ones
-        For Each existingServerNode As XmlNode In serversNode.SelectNodes("Server")
+        For Each existingServerNode As Xml.XmlNode In serversNode.SelectNodes("Server")
             serversNode.RemoveChild(existingServerNode)
         Next
 
@@ -515,7 +537,7 @@ Public Class BackupManager
             Next
             serverNode.AppendChild(excludedDbsNode)
 
-            Dim scheduleNode As XmlNode = doc.CreateElement("Schedule")
+            Dim scheduleNode As Xml.XmlNode = doc.CreateElement("Schedule")
             Dim enabledNode = doc.CreateElement("Enabled")
             enabledNode.InnerText = server.Schedule.Enabled.ToString()
             scheduleNode.AppendChild(enabledNode)
@@ -545,6 +567,23 @@ Public Class BackupManager
             Dim isEncryptedNode = doc.CreateElement("IsPasswordEncrypted")
             isEncryptedNode.InnerText = server.IsPasswordEncrypted.ToString()
             serverNode.AppendChild(isEncryptedNode)
+
+            ' Guardar eventos de respaldo
+            Dim eventosNode As Xml.XmlNode = doc.CreateElement("Eventos")
+            For Each evento As EventoRespaldo In server.Eventos
+                Dim eventoNode As Xml.XmlNode = doc.CreateElement("Evento")
+
+                Dim fechaHoraNode = doc.CreateElement("FechaHora")
+                fechaHoraNode.InnerText = evento.FechaHora.ToString("o") ' ISO 8601 format
+                eventoNode.AppendChild(fechaHoraNode)
+
+                Dim descripcionNode = doc.CreateElement("Descripcion")
+                descripcionNode.InnerText = evento.Descripcion
+                eventoNode.AppendChild(descripcionNode)
+
+                eventosNode.AppendChild(eventoNode)
+            Next
+            serverNode.AppendChild(eventosNode)
 
             serversNode.AppendChild(serverNode)
         Next
@@ -576,6 +615,7 @@ Public Class BackupManager
             existingServer.OmitirRespaldosVentana = server.OmitirRespaldosVentana
             existingServer.InicioVentana = server.InicioVentana
             existingServer.FinVentana = server.FinVentana
+            existingServer.Eventos = server.Eventos
         Else
             ' Add new server
             _servers.Add(server)
@@ -771,6 +811,10 @@ Public Class Server
     ''' Obtiene o establece un valor que indica si la contraseña de este servidor está encriptada.
     ''' </summary>
     Public Property IsPasswordEncrypted As Boolean
+    ''' <summary>
+    ''' Obtiene la lista de respaldos por evento programados para este servidor.
+    ''' </summary>
+    Public Property Eventos As New List(Of EventoRespaldo)
 
     ''' <summary>
     ''' Inicializa una nueva instancia de la clase <see cref="Server"/>.
@@ -802,6 +846,30 @@ Public Class ScheduleInfo
 
     ''' <summary>
     ''' Inicializa una nueva instancia de la clase <see cref="ScheduleInfo"/>.
+    ''' </summary>
+    Public Sub New()
+        ' Constructor
+    End Sub
+End Class
+
+''' <summary>
+''' Representa un respaldo especial programado para una fecha y hora específicas.
+''' </summary>
+''' <remarks>
+''' Utilizado para programar respaldos únicos en respuesta a eventos como ventanas de mantenimiento.
+''' </remarks>
+Public Class EventoRespaldo
+    ''' <summary>
+    ''' Obtiene o establece la fecha y hora programada para el respaldo.
+    ''' </summary>
+    Public Property FechaHora As DateTime
+    ''' <summary>
+    ''' Obtiene o establece una descripción opcional para el evento.
+    ''' </summary>
+    Public Property Descripcion As String
+
+    ''' <summary>
+    ''' Inicializa una nueva instancia de la clase <see cref="EventoRespaldo"/>.
     ''' </summary>
     Public Sub New()
         ' Constructor

@@ -32,25 +32,23 @@ Public Class Form1
             AppLogger.Log("La aplicación no se está ejecutando como administrador. No se pueden establecer permisos de log automáticamente.", "WARNING")
         End If
 
+
         LoadServers()
         SetupDataGridView()
         DisplayServers()
-        UpdateServiceStatus() ' Llamada inicial para actualizar el estado del servicio
+        UpdateServiceStatus()
 
-        ' Configurar y iniciar el Timer para actualizar el estado del servicio
-        serviceStatusTimer.Enabled = True
-        serviceStatusTimer.Interval = 5000 ' Actualizar cada 5 segundos (5000 milisegundos)
+
+        serviceStatusTimer.Interval = 5000
         AddHandler serviceStatusTimer.Tick, AddressOf ServiceStatusTimer_Tick
         serviceStatusTimer.Start()
 
-        ' Configurar y iniciar el Timer para actualizar el log
-        logUpdateTimer.Interval = 2000 ' Actualizar cada 2 segundos
+        logUpdateTimer.Interval = 2000
         AddHandler logUpdateTimer.Tick, AddressOf LogUpdateTimer_Tick
         logUpdateTimer.Start()
-        LoadLog() ' Carga inicial del log
+        LoadLog()
 
-        ' Configurar y iniciar el Timer para actualizar el progreso
-        progressUpdateTimer.Interval = 1000 ' Actualizar cada 1 segundo
+        progressUpdateTimer.Interval = 1000
         AddHandler progressUpdateTimer.Tick, AddressOf ProgressUpdateTimer_Tick
         progressUpdateTimer.Start()
     End Sub
@@ -156,6 +154,9 @@ Public Class Form1
     Private Sub DisplayServers()
         dgvServers.DataSource = Nothing
         dgvServers.DataSource = servers
+        If servers.Any() Then
+            dgvServers.Rows(0).Selected = True
+        End If
     End Sub
 
     Private Sub btnAdd_Click(sender As Object, e As EventArgs) Handles btnAdd.Click
@@ -512,5 +513,92 @@ Public Class Form1
             End If
         End Using
     End Sub
+
+#Region "Eventos de Respaldo"
+
+    Private Sub dgvServers_SelectionChanged(sender As Object, e As EventArgs) Handles dgvServers.SelectionChanged
+        If dgvServers.SelectedRows.Count > 0 Then
+            Dim selectedServer = CType(dgvServers.SelectedRows(0).DataBoundItem, Server)
+            DisplayEventos(selectedServer)
+        Else
+            DisplayEventos(Nothing)
+        End If
+    End Sub
+
+    Private Sub DisplayEventos(server As Server)
+        dgvEventos.DataSource = Nothing ' Limpiar el DataSource
+        grpEventos.Enabled = (server IsNot Nothing)
+
+        If server IsNot Nothing Then
+            ' Ordenar los eventos por fecha y hora
+            Dim sortedEvents = server.Eventos.OrderBy(Function(ev) ev.FechaHora).ToList()
+            dgvEventos.DataSource = sortedEvents
+            dgvEventos.ClearSelection() ' Deseleccionar cualquier fila por defecto
+        End If
+
+    End Sub
+
+    Private Sub btnAnadirEvento_Click(sender As Object, e As EventArgs) Handles btnAnadirEvento.Click
+        If dgvServers.SelectedRows.Count = 0 Then
+            MessageBox.Show("Por favor, seleccione un servidor primero.", "Servidor no seleccionado", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            Return
+        End If
+
+        Dim selectedServer = CType(dgvServers.SelectedRows(0).DataBoundItem, Server)
+
+        Using form As New FormEditorEvento()
+            If form.ShowDialog(Me) = DialogResult.OK Then
+                selectedServer.Eventos.Add(form.Evento)
+                backupManager.SaveServers(configFilePath)
+                DisplayEventos(selectedServer)
+                AppLogger.Log($"Evento añadido para el servidor '{selectedServer.Name}'", "UI")
+            End If
+        End Using
+    End Sub
+
+    Private Sub btnEditarEvento_Click(sender As Object, e As EventArgs) Handles btnEditarEvento.Click
+        If dgvServers.SelectedRows.Count = 0 OrElse dgvEventos.SelectedRows.Count = 0 Then
+            MessageBox.Show("Por favor, seleccione un servidor y un evento para editar.", "Selección requerida", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            Return
+        End If
+
+        Dim selectedServer = CType(dgvServers.SelectedRows(0).DataBoundItem, Server)
+        Dim selectedEvento = CType(dgvEventos.SelectedRows(0).DataBoundItem, EventoRespaldo)
+
+        Using form As New FormEditorEvento(selectedEvento)
+            If form.ShowDialog(Me) = DialogResult.OK Then
+                ' El objeto se modifica por referencia, solo necesitamos guardar y refrescar
+                backupManager.SaveServers(configFilePath)
+                DisplayEventos(selectedServer)
+                AppLogger.Log($"Evento actualizado para el servidor '{selectedServer.Name}'", "UI")
+            End If
+        End Using
+    End Sub
+
+    Private Sub btnEliminarEvento_Click(sender As Object, e As EventArgs) Handles btnEliminarEvento.Click
+        If dgvServers.SelectedRows.Count = 0 OrElse dgvEventos.SelectedRows.Count = 0 Then
+            MessageBox.Show("Por favor, seleccione un servidor y un evento para eliminar.", "Selección requerida", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            Return
+        End If
+
+        If MessageBox.Show("¿Está seguro de que desea eliminar el evento seleccionado?", "Confirmar Eliminación", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) = DialogResult.No Then
+            Return
+        End If
+
+        Dim selectedServer = CType(dgvServers.SelectedRows(0).DataBoundItem, Server)
+        Dim selectedEvento = CType(dgvEventos.SelectedRows(0).DataBoundItem, EventoRespaldo)
+
+        selectedServer.Eventos.Remove(selectedEvento)
+        backupManager.SaveServers(configFilePath)
+        DisplayEventos(selectedServer)
+        AppLogger.Log($"Evento eliminado del servidor '{selectedServer.Name}'", "UI")
+    End Sub
+
+
+
+
+#End Region
+
+
 
 End Class
