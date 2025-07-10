@@ -120,4 +120,13 @@
   <data name="lblExclusionInfo.Text" xml:space="preserve">
     <value>**Lógica de Respaldo:** Este sistema respaldará **TODAS** las bases de datos encontradas en el servidor MySQL, **EXCEPTO** aquellas que usted seleccione en la lista de abajo. Si una base de datos nueva aparece en el servidor y no está marcada aquí, se incluirá automáticamente en el respaldo. Marque solo las bases de datos que desea *excluir*.</value>
   </data>
+  <data name="Label8.Text" xml:space="preserve">
+    <value>¿Cómo funciona?
+
+Esta opción evita que los respaldos que se omitieron (por ejemplo, por tener el equipo apagado) se ejecuten durante un período específico, como el horario laboral.
+
+Si esta opción está activa, el servicio no iniciará un respaldo omitido si la hora actual está dentro de la ventana de tiempo definida.
+
+Nota: Esto no afecta a los respaldos programados para ejecutarse normalmente a su hora.</value>
+  </data>
 </root>

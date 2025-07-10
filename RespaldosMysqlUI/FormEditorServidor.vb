@@ -6,12 +6,13 @@ Public Class FormEditorServidor
 
     Public Property ServerData As Server
     Private isEditMode As Boolean
+    Public BackupManagerInstance As BackupManager
 
-
-
-    Public Sub New(Optional serverToEdit As Server = Nothing)
+    Public Sub New(manager As BackupManager, Optional serverToEdit As Server = Nothing)
         InitializeComponent()
         AppLogger.Log("FormEditorServidor abierto.", "UI")
+
+        BackupManagerInstance = manager
 
         If serverToEdit IsNot Nothing Then
             isEditMode = True
@@ -41,7 +42,17 @@ Public Class FormEditorServidor
         txtIP.Text = ServerData.IP
         txtPort.Text = ServerData.Port.ToString()
         txtUser.Text = ServerData.User
-        txtPassword.Text = ServerData.Password
+        If ServerData.IsPasswordEncrypted Then
+            Try
+                txtPassword.Text = EncryptionHelper.Decrypt(ServerData.Password)
+            Catch ex As Exception
+                AppLogger.Log($"Error al desencriptar la contraseña para {ServerData.Name}: {ex.Message}", "ERROR")
+                MessageBox.Show($"Error al desencriptar la contraseña para {ServerData.Name}. Es posible que la clave de encriptación haya cambiado o que la contraseña esté corrupta.", "Error de Encriptación", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                txtPassword.Text = "" ' Limpiar el campo para evitar usar una contraseña incorrecta
+            End Try
+        Else
+            txtPassword.Text = ServerData.Password
+        End If
 
         ' Cargar configuración de la programación
         chkScheduleEnabled.Checked = ServerData.Schedule.Enabled
@@ -58,6 +69,13 @@ Public Class FormEditorServidor
 
         UpdateScheduleControls()
 
+        ' Cargar configuración de la ventana de omisión
+        chkOmitirVentana.Checked = ServerData.OmitirRespaldosVentana
+        dtpInicioVentana.Value = DateTime.Today + ServerData.InicioVentana
+        dtpFinVentana.Value = DateTime.Today + ServerData.FinVentana
+
+        UpdateOmissionControls()
+
         ' Populate clbDatabases with all databases from the server and check excluded ones
         If isEditMode Then
             ' We need to get all databases from the server first, then mark the excluded ones.
@@ -72,7 +90,20 @@ Public Class FormEditorServidor
         connBuilder.Server = txtIP.Text
         connBuilder.Port = Integer.Parse(txtPort.Text)
         connBuilder.UserID = txtUser.Text
-        connBuilder.Password = txtPassword.Text
+        
+        Dim passwordToUse As String
+        If ServerData.IsPasswordEncrypted Then
+            Try
+                passwordToUse = EncryptionHelper.Decrypt(ServerData.Password)
+            Catch ex As Exception
+                MessageBox.Show($"Error al desencriptar la contraseña: {ex.Message}", "Error de Encriptación", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                AppLogger.Log($"Error al desencriptar la contraseña para {ServerData.Name}: {ex.Message}", "ERROR")
+                Return
+            End Try
+        Else
+            passwordToUse = txtPassword.Text
+        End If
+        connBuilder.Password = passwordToUse
         Dim tempConn As New MySqlConnection(connBuilder.ConnectionString)
 
         Try
@@ -118,12 +149,33 @@ Public Class FormEditorServidor
             Return
         End If
 
+        ' --- Validación de seguridad ---
+        If Not BackupManagerInstance.IsInputSafe(txtName.Text) OrElse Not BackupManagerInstance.IsInputSafe(txtIP.Text) OrElse Not BackupManagerInstance.IsInputSafe(txtUser.Text) Then
+            MessageBox.Show("Los campos Nombre, IP/Host y Usuario no pueden contener caracteres especiales como: & | ; $ > < ` \ !", "Entrada no válida", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            AppLogger.Log("Save operation failed: Invalid characters detected.", "WARNING")
+            Return
+        End If
+
         ' Recopilar datos
         ServerData.Name = txtName.Text
         ServerData.IP = txtIP.Text
         ServerData.Port = Integer.Parse(txtPort.Text)
         ServerData.User = txtUser.Text
-        ServerData.Password = txtPassword.Text
+
+        If BackupManagerInstance.EncryptPasswords Then
+            Try
+                ServerData.Password = EncryptionHelper.Encrypt(txtPassword.Text)
+                ServerData.IsPasswordEncrypted = True
+            Catch ex As Exception
+                AppLogger.Log($"Error al encriptar la contraseña para {ServerData.Name}: {ex.Message}", "ERROR")
+                MessageBox.Show($"Error al encriptar la contraseña para {ServerData.Name}. La contraseña se guardará en texto plano.", "Error de Encriptación", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+                ServerData.Password = txtPassword.Text
+                ServerData.IsPasswordEncrypted = False
+            End Try
+        Else
+            ServerData.Password = txtPassword.Text
+            ServerData.IsPasswordEncrypted = False
+        End If
 
         ' Clear existing Databases and populate ExcludedDatabases
         ServerData.Databases.Clear() ' No longer used for selection
@@ -146,6 +198,11 @@ Public Class FormEditorServidor
         ServerData.Schedule.Days = selectedDays
         AppLogger.Log($"Schedule settings updated for server '{ServerData.Name}'. Enabled: {ServerData.Schedule.Enabled}, Days: {String.Join(",", ServerData.Schedule.Days)}, Time: {ServerData.Schedule.Time}", "UI")
 
+        ' Guardar configuración de la ventana de omisión
+        ServerData.OmitirRespaldosVentana = chkOmitirVentana.Checked
+        ServerData.InicioVentana = dtpInicioVentana.Value.TimeOfDay
+        ServerData.FinVentana = dtpFinVentana.Value.TimeOfDay
+
         Me.DialogResult = DialogResult.OK
         Me.Close()
         AppLogger.Log($"FormEditorServidor closed. Server '{ServerData.Name}' data saved.", "UI")
@@ -158,6 +215,15 @@ Public Class FormEditorServidor
     Private Sub UpdateScheduleControls()
         pnlScheduleDays.Enabled = chkScheduleEnabled.Checked
         dtpScheduleTime.Enabled = chkScheduleEnabled.Checked
+    End Sub
+
+    Private Sub chkOmitirVentana_CheckedChanged(sender As Object, e As EventArgs) Handles chkOmitirVentana.CheckedChanged
+        UpdateOmissionControls()
+    End Sub
+
+    Private Sub UpdateOmissionControls()
+        dtpInicioVentana.Enabled = chkOmitirVentana.Checked
+        dtpFinVentana.Enabled = chkOmitirVentana.Checked
     End Sub
 
 End Class

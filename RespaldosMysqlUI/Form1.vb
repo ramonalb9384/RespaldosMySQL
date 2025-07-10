@@ -6,6 +6,8 @@ Imports System.Security.Principal
 Imports System.Configuration.Install
 Imports System.ServiceProcess
 Imports RespaldosMysqlLibrary
+Imports Newtonsoft.Json
+Imports System.Security.AccessControl
 
 Public Class Form1
 
@@ -14,11 +16,22 @@ Public Class Form1
     Private configFilePath As String = Path.Combine(Application.StartupPath, "servers.xml")
 
     Private WithEvents serviceStatusTimer As New System.Windows.Forms.Timer() ' Declaración del Timer
-    Private logWatcher As FileSystemWatcher
-    Private lastLogReadPosition As Long = 0
+    Private WithEvents logUpdateTimer As New System.Windows.Forms.Timer()
+    Private WithEvents progressUpdateTimer As New System.Windows.Forms.Timer()
+    Private _logLinesReadCount As Integer = 0
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        AppLogger.LogBasePath = Application.StartupPath
         AppLogger.Log("Formulario principal cargado.", "UI")
+
+        ' Attempt to set log folder permissions if running as administrator
+        If IsAdministrator() Then
+            Dim logDirectory As String = Path.Combine(AppLogger.LogBasePath, "Logs")
+            SetLogFolderPermissions(logDirectory)
+        Else
+            AppLogger.Log("La aplicación no se está ejecutando como administrador. No se pueden establecer permisos de log automáticamente.", "WARNING")
+        End If
+
         LoadServers()
         SetupDataGridView()
         DisplayServers()
@@ -30,9 +43,90 @@ Public Class Form1
         AddHandler serviceStatusTimer.Tick, AddressOf ServiceStatusTimer_Tick
         serviceStatusTimer.Start()
 
-        ' Configurar el FileSystemWatcher para el log
-        SetupLogWatcher()
-        LoadInitialLog()
+        ' Configurar y iniciar el Timer para actualizar el log
+        logUpdateTimer.Interval = 2000 ' Actualizar cada 2 segundos
+        AddHandler logUpdateTimer.Tick, AddressOf LogUpdateTimer_Tick
+        logUpdateTimer.Start()
+        LoadLog() ' Carga inicial del log
+
+        ' Configurar y iniciar el Timer para actualizar el progreso
+        progressUpdateTimer.Interval = 1000 ' Actualizar cada 1 segundo
+        AddHandler progressUpdateTimer.Tick, AddressOf ProgressUpdateTimer_Tick
+        progressUpdateTimer.Start()
+    End Sub
+
+    Private Sub ProgressUpdateTimer_Tick(sender As Object, e As EventArgs)
+        UpdateProgress()
+    End Sub
+
+    Private Sub UpdateProgress()
+        Dim statusData As ProgressStatus = ProgressReporter.ReadStatus()
+
+        If statusData IsNot Nothing Then
+            ProgressBar1.Value = statusData.Progress
+            lblProgressStatus.Text = statusData.Status
+            ProgressBar1.Visible = True
+            lblProgressStatus.Visible = True
+        Else
+            ProgressBar1.Visible = False
+            lblProgressStatus.Visible = False
+        End If
+    End Sub
+
+    Private Sub LogUpdateTimer_Tick(sender As Object, e As EventArgs)
+        LoadLog()
+    End Sub
+
+    Private Sub LoadLog()
+        Try
+            Dim logDirectory As String = Path.Combine(AppLogger.LogBasePath, "Logs")
+            Dim logFileName As String = $"LOG_{DateTime.Now.ToString("yyyyMMdd")}.txt"
+            Dim logFilePath As String = Path.Combine(logDirectory, logFileName)
+
+            If File.Exists(logFilePath) Then
+                Dim lines As String() = File.ReadAllLines(logFilePath)
+
+                If lines.Length < _logLinesReadCount Then ' Log file has been reset (new day)
+                    txtLogOutput.Clear()
+                    _logLinesReadCount = 0
+                End If
+
+                If lines.Length > _logLinesReadCount Then
+                    For i As Integer = _logLinesReadCount To lines.Length - 1
+                        Dim line As String = lines(i)
+                        Dim color As Color = Color.Black
+                        If line.Contains("[ERROR]") Then
+                            color = Color.Red
+                        ElseIf line.Contains("[ADVERTENCIA]") Then
+                            color = Color.Orange
+                        ElseIf line.Contains("[BACKUP]") Then
+                            color = Color.Blue
+                        ElseIf line.Contains("[ZIP]") Then
+                            color = Color.Green
+                        ElseIf line.Contains("[CLEANUP]") Then
+                            color = Color.Gray
+                        End If
+                        AppendText(line & Environment.NewLine, color)
+                    Next
+                    _logLinesReadCount = lines.Length
+                    txtLogOutput.ScrollToCaret()
+                End If
+            Else
+                txtLogOutput.Clear()
+                _logLinesReadCount = 0
+                txtLogOutput.Text = "No se ha generado ningún log para el día de hoy."
+            End If
+        Catch ex As Exception
+            txtLogOutput.Text = $"Error al cargar el log: {ex.Message}"
+        End Try
+    End Sub
+
+    Private Sub AppendText(text As String, color As Color)
+        txtLogOutput.SelectionStart = txtLogOutput.TextLength
+        txtLogOutput.SelectionLength = 0
+        txtLogOutput.SelectionColor = color
+        txtLogOutput.AppendText(text)
+        txtLogOutput.SelectionColor = txtLogOutput.ForeColor
     End Sub
 
     Private Sub ServiceStatusTimer_Tick(sender As Object, e As EventArgs) Handles serviceStatusTimer.Tick
@@ -66,7 +160,7 @@ Public Class Form1
 
     Private Sub btnAdd_Click(sender As Object, e As EventArgs) Handles btnAdd.Click
         AppLogger.Log("Botón 'Añadir Servidor' presionado.", "UI")
-        Using editorForm As New FormEditorServidor()
+        Using editorForm As New FormEditorServidor(backupManager)
             If editorForm.ShowDialog() = DialogResult.OK Then
                 servers.Add(editorForm.ServerData)
                 backupManager.SetServers(servers)
@@ -90,7 +184,7 @@ Public Class Form1
         Dim selectedServer = CType(dgvServers.SelectedRows(0).DataBoundItem, Server)
         Dim serverIndex = servers.IndexOf(selectedServer)
 
-        Using editorForm As New FormEditorServidor(selectedServer)
+        Using editorForm As New FormEditorServidor(backupManager, selectedServer)
             If editorForm.ShowDialog() = DialogResult.OK Then
                 servers(serverIndex) = editorForm.ServerData
                 backupManager.SetServers(servers)
@@ -325,91 +419,7 @@ Public Class Form1
         End Try
     End Sub
 
-    Private Sub SetupLogWatcher()
-        Try
-            Dim logDirectory As String = Path.Combine(Application.StartupPath, "Logs")
-            Dim logFileName As String = $"LOG_{DateTime.Now.ToString("yyyyMMdd")}.txt"
-            Dim logFilePath As String = Path.Combine(logDirectory, logFileName)
 
-            If Not Directory.Exists(logDirectory) Then
-                Directory.CreateDirectory(logDirectory)
-            End If
-
-            logWatcher = New FileSystemWatcher()
-            logWatcher.Path = logDirectory
-            logWatcher.Filter = logFileName
-            logWatcher.NotifyFilter = NotifyFilters.LastWrite Or NotifyFilters.Size
-            logWatcher.EnableRaisingEvents = True
-
-            AddHandler logWatcher.Changed, AddressOf LogFileChanged
-            AddHandler logWatcher.Created, AddressOf LogFileChanged
-
-        Catch ex As Exception
-            MessageBox.Show($"Error al configurar el observador de logs: {ex.Message}", "Error de Log")
-        End Try
-    End Sub
-
-    Private Sub LoadInitialLog()
-        Dim logDirectory As String = Path.Combine(Application.StartupPath, "Logs")
-        Dim logFileName As String = $"LOG_{DateTime.Now.ToString("yyyyMMdd")}.txt"
-        Dim logFilePath As String = Path.Combine(logDirectory, logFileName)
-
-        If File.Exists(logFilePath) Then
-            Try
-                Using fs As New FileStream(logFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)
-                    Using sr As New StreamReader(fs)
-                        txtLogOutput.Text = sr.ReadToEnd()
-                        lastLogReadPosition = fs.Length
-                    End Using
-                End Using
-                txtLogOutput.SelectionStart = txtLogOutput.Text.Length
-                txtLogOutput.ScrollToCaret()
-            Catch ex As Exception
-                MessageBox.Show($"Error al cargar el log inicial: {ex.Message}", "Error de Log")
-            End Try
-        End If
-    End Sub
-
-    Private Sub LogFileChanged(sender As Object, e As FileSystemEventArgs)
-        If Me.InvokeRequired Then
-            Me.Invoke(New Action(AddressOf ReadAndAppendLog))
-        Else
-            ReadAndAppendLog()
-        End If
-    End Sub
-
-    Private Sub ReadAndAppendLog()
-        Dim logDirectory As String = Path.Combine(Application.StartupPath, "Logs")
-        Dim logFileName As String = $"LOG_{DateTime.Now.ToString("yyyyMMdd")}.txt"
-        Dim logFilePath As String = Path.Combine(logDirectory, logFileName)
-
-        If File.Exists(logFilePath) Then
-            Try
-                Using fs As New FileStream(logFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)
-                    If fs.Length > lastLogReadPosition Then
-                        fs.Seek(lastLogReadPosition, SeekOrigin.Begin)
-                        Using sr As New StreamReader(fs)
-                            Dim newContent As String = sr.ReadToEnd()
-                            AppendLogText(newContent)
-                            lastLogReadPosition = fs.Length
-                        End Using
-                    ElseIf fs.Length < lastLogReadPosition Then
-                        ' File was truncated or recreated (e.g., new day's log)
-                        txtLogOutput.Clear()
-                        fs.Seek(0, SeekOrigin.Begin)
-                        Using sr As New StreamReader(fs)
-                            Dim newContent As String = sr.ReadToEnd()
-                            AppendLogText(newContent)
-                            lastLogReadPosition = fs.Length
-                        End Using
-                    End If
-                End Using
-            Catch ex As Exception
-                ' Log this error, but don't show a MessageBox repeatedly
-                Console.WriteLine($"Error al leer y añadir al log: {ex.Message}")
-            End Try
-        End If
-    End Sub
 
     Private Sub AppendLogText(text As String)
         If txtLogOutput.InvokeRequired Then
@@ -419,6 +429,88 @@ Public Class Form1
             txtLogOutput.SelectionStart = txtLogOutput.Text.Length
             txtLogOutput.ScrollToCaret()
         End If
+    End Sub
+
+    Private Sub SetLogFolderPermissions(logDirectory As String)
+        Try
+            ' 1. Asegurarse de que el directorio exista
+            If Not Directory.Exists(logDirectory) Then
+                Directory.CreateDirectory(logDirectory)
+            End If
+
+            ' 2. Obtener el control de acceso actual de la carpeta
+            Dim directoryInfo As New DirectoryInfo(logDirectory)
+            Dim directorySecurity As DirectorySecurity = directoryInfo.GetAccessControl()
+
+            ' 3. Definir y añadir reglas de acceso para las cuentas de servicio comunes
+
+            ' Regla para la cuenta LOCAL SERVICE
+            Dim sidLocalService As New Security.Principal.SecurityIdentifier(Security.Principal.WellKnownSidType.LocalServiceSid, Nothing)
+            Dim accountLocalService As New Security.Principal.NTAccount(sidLocalService.Translate(GetType(Security.Principal.NTAccount)).Value)
+            Dim ruleLocalService As New FileSystemAccessRule(accountLocalService, FileSystemRights.FullControl, InheritanceFlags.ContainerInherit Or InheritanceFlags.ObjectInherit, PropagationFlags.None, AccessControlType.Allow)
+            directorySecurity.AddAccessRule(ruleLocalService)
+
+            ' Regla para la cuenta NETWORK SERVICE
+            Dim sidNetworkService As New Security.Principal.SecurityIdentifier(Security.Principal.WellKnownSidType.NetworkServiceSid, Nothing)
+            Dim accountNetworkService As New Security.Principal.NTAccount(sidNetworkService.Translate(GetType(Security.Principal.NTAccount)).Value)
+            Dim ruleNetworkService As New FileSystemAccessRule(accountNetworkService, FileSystemRights.FullControl, InheritanceFlags.ContainerInherit Or InheritanceFlags.ObjectInherit, PropagationFlags.None, AccessControlType.Allow)
+            directorySecurity.AddAccessRule(ruleNetworkService)
+
+            ' Regla para la cuenta SYSTEM (Sistema local)
+            Dim sidSystem As New Security.Principal.SecurityIdentifier(Security.Principal.WellKnownSidType.LocalSystemSid, Nothing)
+            Dim accountSystem As New Security.Principal.NTAccount(sidSystem.Translate(GetType(Security.Principal.NTAccount)).Value)
+            Dim ruleSystem As New FileSystemAccessRule(accountSystem, FileSystemRights.FullControl, InheritanceFlags.ContainerInherit Or InheritanceFlags.ObjectInherit, PropagationFlags.None, AccessControlType.Allow)
+            directorySecurity.AddAccessRule(ruleSystem)
+
+            ' 4. Aplicar los cambios de seguridad a la carpeta
+            directoryInfo.SetAccessControl(directorySecurity)
+            AppLogger.Log($"Permisos de escritura establecidos para la carpeta de logs: {logDirectory}", "UI")
+        Catch ex As Exception
+            AppLogger.Log($"Error al establecer permisos para la carpeta de logs {logDirectory}: {ex.Message}", "ERROR")
+        End Try
+    End Sub
+
+    Private Sub btnExportConfig_Click(sender As Object, e As EventArgs) Handles btnExportConfig.Click
+        AppLogger.Log("Botón 'Exportar Configuración' presionado.", "UI")
+        Using sfd As New SaveFileDialog()
+            sfd.Filter = "Archivos XML (*.xml)|*.xml"
+            sfd.Title = "Guardar Configuración de Servidores"
+            sfd.FileName = "servers.xml"
+            If sfd.ShowDialog() = DialogResult.OK Then
+                Try
+                    backupManager.SaveServers(sfd.FileName)
+                    MessageBox.Show("Configuración exportada con éxito.", "Exportar", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                    AppLogger.Log($"Configuración exportada a: {sfd.FileName}", "UI")
+                Catch ex As Exception
+                    MessageBox.Show($"Error al exportar la configuración: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                    AppLogger.Log($"Error al exportar la configuración: {ex.ToString()}", "ERROR")
+                End Try
+            Else
+                AppLogger.Log("Exportación de configuración cancelada.", "UI")
+            End If
+        End Using
+    End Sub
+
+    Private Sub btnImportConfig_Click(sender As Object, e As EventArgs) Handles btnImportConfig.Click
+        AppLogger.Log("Botón 'Importar Configuración' presionado.", "UI")
+        Using ofd As New OpenFileDialog()
+            ofd.Filter = "Archivos XML (*.xml)|*.xml"
+            ofd.Title = "Seleccionar Archivo de Configuración de Servidores"
+            If ofd.ShowDialog() = DialogResult.OK Then
+                Try
+                    backupManager.LoadServers(ofd.FileName)
+                    servers = backupManager.GetServers()
+                    DisplayServers()
+                    MessageBox.Show("Configuración importada con éxito.", "Importar", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                    AppLogger.Log($"Configuración importada desde: {ofd.FileName}", "UI")
+                Catch ex As Exception
+                    MessageBox.Show($"Error al importar la configuración: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                    AppLogger.Log($"Error al importar la configuración: {ex.ToString()}", "ERROR")
+                End Try
+            Else
+                AppLogger.Log("Importación de configuración cancelada.", "UI")
+            End If
+        End Using
     End Sub
 
 End Class

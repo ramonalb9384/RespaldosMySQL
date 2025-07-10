@@ -41,6 +41,20 @@ Public Class ProgressReporter
             AppLogger.Log($"Error al limpiar el estado del progreso: {ex.Message}", "ERROR")
         End Try
     End Sub
+
+    Public Shared Function ReadStatus() As ProgressStatus
+        Try
+            If File.Exists(StatusFilePath) Then
+                Dim jsonString As String = File.ReadAllText(StatusFilePath)
+                If Not String.IsNullOrWhiteSpace(jsonString) Then
+                    Return JsonConvert.DeserializeObject(Of ProgressStatus)(jsonString)
+                End If
+            End If
+        Catch ex As Exception
+            AppLogger.Log($"Error al leer el estado del progreso: {ex.Message}", "ERROR")
+        End Try
+        Return Nothing
+    End Function
 End Class
 
 Public Class ProgressStatus

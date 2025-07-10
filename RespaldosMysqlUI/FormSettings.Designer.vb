@@ -33,65 +33,73 @@ Partial Class FormSettings
         Me.OpenFileDialog1 = New System.Windows.Forms.OpenFileDialog()
         Me.FolderBrowserDialog1 = New System.Windows.Forms.FolderBrowserDialog()
         Me.Label3 = New System.Windows.Forms.Label()
-        Me.txtSevenZipPath = New TextBox
-        btnBrowseSevenZip = New Button
+        Me.txtSevenZipPath = New System.Windows.Forms.TextBox()
+        Me.btnBrowseSevenZip = New System.Windows.Forms.Button()
+        Me.chkEncryptPasswords = New System.Windows.Forms.CheckBox()
         Me.SuspendLayout()
         '
         'Label1
         '
         Me.Label1.AutoSize = True
-        Me.Label1.Location = New System.Drawing.Point(12, 15)
+        Me.Label1.Location = New System.Drawing.Point(16, 18)
+        Me.Label1.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(106, 13)
+        Me.Label1.Size = New System.Drawing.Size(136, 16)
         Me.Label1.TabIndex = 0
         Me.Label1.Text = "Ruta mysqldump.exe:"
         '
         'txtMySqlDumpPath
         '
-        Me.txtMySqlDumpPath.Location = New System.Drawing.Point(124, 12)
+        Me.txtMySqlDumpPath.Location = New System.Drawing.Point(165, 15)
+        Me.txtMySqlDumpPath.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
         Me.txtMySqlDumpPath.Name = "txtMySqlDumpPath"
-        Me.txtMySqlDumpPath.Size = New System.Drawing.Size(280, 20)
+        Me.txtMySqlDumpPath.Size = New System.Drawing.Size(372, 22)
         Me.txtMySqlDumpPath.TabIndex = 1
         '
         'btnBrowseMySqlDump
         '
-        Me.btnBrowseMySqlDump.Location = New System.Drawing.Point(410, 10)
+        Me.btnBrowseMySqlDump.Location = New System.Drawing.Point(547, 12)
+        Me.btnBrowseMySqlDump.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
         Me.btnBrowseMySqlDump.Name = "btnBrowseMySqlDump"
-        Me.btnBrowseMySqlDump.Size = New System.Drawing.Size(75, 23)
+        Me.btnBrowseMySqlDump.Size = New System.Drawing.Size(100, 28)
         Me.btnBrowseMySqlDump.TabIndex = 2
         Me.btnBrowseMySqlDump.Text = "Examinar..."
         Me.btnBrowseMySqlDump.UseVisualStyleBackColor = True
         '
         'btnBrowseBackupPath
         '
-        Me.btnBrowseBackupPath.Location = New System.Drawing.Point(410, 49)
+        Me.btnBrowseBackupPath.Location = New System.Drawing.Point(547, 60)
+        Me.btnBrowseBackupPath.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
         Me.btnBrowseBackupPath.Name = "btnBrowseBackupPath"
-        Me.btnBrowseBackupPath.Size = New System.Drawing.Size(75, 23)
+        Me.btnBrowseBackupPath.Size = New System.Drawing.Size(100, 28)
         Me.btnBrowseBackupPath.TabIndex = 5
         Me.btnBrowseBackupPath.Text = "Examinar..."
         Me.btnBrowseBackupPath.UseVisualStyleBackColor = True
         '
         'txtBackupPath
         '
-        Me.txtBackupPath.Location = New System.Drawing.Point(124, 51)
+        Me.txtBackupPath.Location = New System.Drawing.Point(165, 63)
+        Me.txtBackupPath.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
         Me.txtBackupPath.Name = "txtBackupPath"
-        Me.txtBackupPath.Size = New System.Drawing.Size(280, 20)
+        Me.txtBackupPath.Size = New System.Drawing.Size(372, 22)
         Me.txtBackupPath.TabIndex = 4
         '
         'Label2
         '
         Me.Label2.AutoSize = True
-        Me.Label2.Location = New System.Drawing.Point(12, 54)
+        Me.Label2.Location = New System.Drawing.Point(16, 66)
+        Me.Label2.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.Label2.Name = "Label2"
-        Me.Label2.Size = New System.Drawing.Size(106, 13)
+        Me.Label2.Size = New System.Drawing.Size(127, 16)
         Me.Label2.TabIndex = 3
         Me.Label2.Text = "Ruta de Respaldos:"
         '
         'btnSave
         '
-        Me.btnSave.Location = New System.Drawing.Point(329, 133)
+        Me.btnSave.Location = New System.Drawing.Point(439, 164)
+        Me.btnSave.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
         Me.btnSave.Name = "btnSave"
-        Me.btnSave.Size = New System.Drawing.Size(75, 23)
+        Me.btnSave.Size = New System.Drawing.Size(100, 28)
         Me.btnSave.TabIndex = 9
         Me.btnSave.Text = "Guardar"
         Me.btnSave.UseVisualStyleBackColor = True
@@ -99,9 +107,10 @@ Partial Class FormSettings
         'btnCancel
         '
         Me.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel
-        Me.btnCancel.Location = New System.Drawing.Point(410, 133)
+        Me.btnCancel.Location = New System.Drawing.Point(547, 164)
+        Me.btnCancel.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
         Me.btnCancel.Name = "btnCancel"
-        Me.btnCancel.Size = New System.Drawing.Size(75, 23)
+        Me.btnCancel.Size = New System.Drawing.Size(100, 28)
         Me.btnCancel.TabIndex = 10
         Me.btnCancel.Text = "Cancelar"
         Me.btnCancel.UseVisualStyleBackColor = True
@@ -119,35 +128,49 @@ Partial Class FormSettings
         'Label3
         '
         Me.Label3.AutoSize = True
-        Me.Label3.Location = New System.Drawing.Point(12, 93)
+        Me.Label3.Location = New System.Drawing.Point(16, 114)
+        Me.Label3.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.Label3.Name = "Label3"
-        Me.Label3.Size = New System.Drawing.Size(80, 13)
+        Me.Label3.Size = New System.Drawing.Size(79, 16)
         Me.Label3.TabIndex = 6
         Me.Label3.Text = "Ruta 7z.exe:"
         '
         'txtSevenZipPath
         '
-        Me.txtSevenZipPath.Location = New System.Drawing.Point(124, 90)
+        Me.txtSevenZipPath.Location = New System.Drawing.Point(165, 111)
+        Me.txtSevenZipPath.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
         Me.txtSevenZipPath.Name = "txtSevenZipPath"
-        Me.txtSevenZipPath.Size = New System.Drawing.Size(280, 20)
+        Me.txtSevenZipPath.Size = New System.Drawing.Size(372, 22)
         Me.txtSevenZipPath.TabIndex = 7
         '
         'btnBrowseSevenZip
         '
-        Me.btnBrowseSevenZip.Location = New System.Drawing.Point(410, 88)
+        Me.btnBrowseSevenZip.Location = New System.Drawing.Point(547, 108)
+        Me.btnBrowseSevenZip.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
         Me.btnBrowseSevenZip.Name = "btnBrowseSevenZip"
-        Me.btnBrowseSevenZip.Size = New System.Drawing.Size(75, 23)
+        Me.btnBrowseSevenZip.Size = New System.Drawing.Size(100, 28)
         Me.btnBrowseSevenZip.TabIndex = 8
         Me.btnBrowseSevenZip.Text = "Examinar..."
         Me.btnBrowseSevenZip.UseVisualStyleBackColor = True
         '
+        'chkEncryptPasswords
+        '
+        Me.chkEncryptPasswords.AutoSize = True
+        Me.chkEncryptPasswords.Location = New System.Drawing.Point(19, 154)
+        Me.chkEncryptPasswords.Name = "chkEncryptPasswords"
+        Me.chkEncryptPasswords.Size = New System.Drawing.Size(368, 20)
+        Me.chkEncryptPasswords.TabIndex = 11
+        Me.chkEncryptPasswords.Text = "Encriptar contraseñas de los servidores (Recomendado)"
+        Me.chkEncryptPasswords.UseVisualStyleBackColor = True
+        '
         'FormSettings
         '
         Me.AcceptButton = Me.btnSave
-        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
+        Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.CancelButton = Me.btnCancel
-        Me.ClientSize = New System.Drawing.Size(497, 170)
+        Me.ClientSize = New System.Drawing.Size(663, 209)
+        Me.Controls.Add(Me.chkEncryptPasswords)
         Me.Controls.Add(Me.btnBrowseSevenZip)
         Me.Controls.Add(Me.txtSevenZipPath)
         Me.Controls.Add(Me.Label3)
@@ -160,6 +183,7 @@ Partial Class FormSettings
         Me.Controls.Add(Me.txtMySqlDumpPath)
         Me.Controls.Add(Me.Label1)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog
+        Me.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
         Me.MaximizeBox = False
         Me.MinimizeBox = False
         Me.Name = "FormSettings"
@@ -183,5 +207,5 @@ Partial Class FormSettings
     Friend WithEvents Label3 As Label
     Friend WithEvents txtSevenZipPath As TextBox
     Friend WithEvents btnBrowseSevenZip As Button
-
+    Friend WithEvents chkEncryptPasswords As CheckBox
 End Class

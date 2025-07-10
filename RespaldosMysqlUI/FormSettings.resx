@@ -1,63 +1,63 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
-    Esquema de recursos de Microsoft ResX 
+    Microsoft ResX Schema 
     
-    Versión 2.0
+    Version 2.0
     
-    Los objetivos principales de este formato son permitir un formato XML simple 
-    que sea en su mayoría legible por humanos. La generación y el análisis de los 
-    diversos tipos de datos se realizan a través de las clases TypeConverter 
-    asociadas con los tipos de datos.
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
     
-    Ejemplo:
+    Example:
     
-    ... encabezados y esquema ado.net/XML ...
+    ... ado.net/XML headers & schema ...
     <resheader name="resmimetype">text/microsoft-resx</resheader>
     <resheader name="version">2.0</resheader>
     <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
     <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
-    <data name="Name1"><value>esta es mi cadena larga</value><comment>este es un comentario</comment></data>
-    <data name="Color1" type="System.Drawing.Color, System.Drawing">Azul</data>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
     <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
-        <value>[objeto .NET Framework serializado codificado en base64 mime]</value>
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
     </data>
     <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-        <value>[cadena codificada en base64 mime que representa una forma de matriz de bytes del objeto .NET Framework]</value>
-        <comment>Este es un comentario</comment>
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
     </data>
                 
-    Hay un número cualquiera de filas "resheader" que contienen pares simples 
-    nombre/valor.
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
     
-    Cada fila de datos contiene un nombre y un valor. La fila también contiene un 
-    tipo o mimetype. El tipo corresponde a una clase .NET que admite 
-    la conversión de texto/valor a través de la arquitectura TypeConverter. 
-    Las clases que no admiten esto se serializan y almacenan con el 
-    mimetype establecido.
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
     
-    El mimetype se utiliza para objetos serializados y le indica al 
-    ResXResourceReader cómo despersistir el objeto. Actualmente no es 
-    extensible. Para un mimetype dado, el valor debe establecerse en consecuencia:
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
     
-    Nota: application/x-microsoft.net.object.binary.base64 es el formato 
-    que generará ResXResourceWriter; sin embargo, el lector puede 
-    leer cualquiera de los formatos que se enumeran a continuación.
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
     
     mimetype: application/x-microsoft.net.object.binary.base64
-    value   : El objeto debe serializarse con 
+    value   : The object must be serialized with 
             : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
-            : y luego codificarse con codificación base64.
+            : and then encoded with base64 encoding.
     
     mimetype: application/x-microsoft.net.object.soap.base64
-    value   : El objeto debe serializarse con 
+    value   : The object must be serialized with 
             : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
-            : y luego codificarse con codificación base64.
+            : and then encoded with base64 encoding.
 
     mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : El objeto debe serializarse en una matriz de bytes 
-            : usando un System.ComponentModel.TypeConverter
-            : y luego codificarse con codificación base64.
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
     -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />

@@ -35,10 +35,18 @@ Partial Class Form1
         Me.btnStopService = New System.Windows.Forms.Button()
         Me.lblServiceStatus = New System.Windows.Forms.Label()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
-        Me.txtLogOutput = New System.Windows.Forms.TextBox()
+        Me.txtLogOutput = New System.Windows.Forms.RichTextBox()
         Me.Label3 = New System.Windows.Forms.Label()
+        Me.StatusStrip1 = New System.Windows.Forms.StatusStrip()
+        Me.lblProgressStatus = New System.Windows.Forms.ToolStripStatusLabel()
+        Me.ProgressBar1 = New System.Windows.Forms.ToolStripProgressBar()
+        Me.GroupBoxConfig = New System.Windows.Forms.GroupBox()
+        Me.btnExportConfig = New System.Windows.Forms.Button()
+        Me.btnImportConfig = New System.Windows.Forms.Button()
         CType(Me.dgvServers, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.GroupBox1.SuspendLayout()
+        Me.StatusStrip1.SuspendLayout()
+        Me.GroupBoxConfig.SuspendLayout()
         Me.SuspendLayout()
         '
         'dgvServers
@@ -49,7 +57,7 @@ Partial Class Form1
         Me.dgvServers.Margin = New System.Windows.Forms.Padding(4)
         Me.dgvServers.Name = "dgvServers"
         Me.dgvServers.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders
-        Me.dgvServers.Size = New System.Drawing.Size(880, 203)
+        Me.dgvServers.Size = New System.Drawing.Size(912, 203)
         Me.dgvServers.TabIndex = 0
         '
         'btnAdd
@@ -84,8 +92,7 @@ Partial Class Form1
         '
         'btnBackupNow
         '
-        Me.btnBackupNow.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.btnBackupNow.Location = New System.Drawing.Point(616, 358)
+        Me.btnBackupNow.Location = New System.Drawing.Point(648, 358)
         Me.btnBackupNow.Margin = New System.Windows.Forms.Padding(4)
         Me.btnBackupNow.Name = "btnBackupNow"
         Me.btnBackupNow.Size = New System.Drawing.Size(280, 37)
@@ -96,20 +103,19 @@ Partial Class Form1
         'Label1
         '
         Me.Label1.AutoSize = True
-        Me.Label1.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Label1.Location = New System.Drawing.Point(12, 124)
         Me.Label1.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(216, 20)
+        Me.Label1.Size = New System.Drawing.Size(156, 16)
         Me.Label1.TabIndex = 6
         Me.Label1.Text = "Servidores Configurados"
         '
         'btnSettings
         '
-        Me.btnSettings.Location = New System.Drawing.Point(467, 358)
+        Me.btnSettings.Location = New System.Drawing.Point(177, 51)
         Me.btnSettings.Margin = New System.Windows.Forms.Padding(4)
         Me.btnSettings.Name = "btnSettings"
-        Me.btnSettings.Size = New System.Drawing.Size(140, 37)
+        Me.btnSettings.Size = New System.Drawing.Size(121, 37)
         Me.btnSettings.TabIndex = 4
         Me.btnSettings.Text = "Configuración"
         Me.btnSettings.UseVisualStyleBackColor = True
@@ -118,7 +124,7 @@ Partial Class Form1
         '
         Me.btnInstallService.Location = New System.Drawing.Point(293, 54)
         Me.btnInstallService.Name = "btnInstallService"
-        Me.btnInstallService.Size = New System.Drawing.Size(120, 24)
+        Me.btnInstallService.Size = New System.Drawing.Size(120, 30)
         Me.btnInstallService.TabIndex = 5
         Me.btnInstallService.Text = "Instalar Servicio"
         Me.btnInstallService.UseVisualStyleBackColor = True
@@ -127,7 +133,7 @@ Partial Class Form1
         '
         Me.btnUninstallService.Location = New System.Drawing.Point(419, 54)
         Me.btnUninstallService.Name = "btnUninstallService"
-        Me.btnUninstallService.Size = New System.Drawing.Size(120, 24)
+        Me.btnUninstallService.Size = New System.Drawing.Size(120, 30)
         Me.btnUninstallService.TabIndex = 6
         Me.btnUninstallService.Text = "Desinstalar Servicio"
         Me.btnUninstallService.UseVisualStyleBackColor = True
@@ -136,7 +142,7 @@ Partial Class Form1
         '
         Me.btnStartService.Location = New System.Drawing.Point(16, 54)
         Me.btnStartService.Name = "btnStartService"
-        Me.btnStartService.Size = New System.Drawing.Size(122, 24)
+        Me.btnStartService.Size = New System.Drawing.Size(122, 30)
         Me.btnStartService.TabIndex = 8
         Me.btnStartService.Text = "Inicia el Servicio"
         Me.btnStartService.UseVisualStyleBackColor = True
@@ -145,7 +151,7 @@ Partial Class Form1
         '
         Me.btnStopService.Location = New System.Drawing.Point(144, 54)
         Me.btnStopService.Name = "btnStopService"
-        Me.btnStopService.Size = New System.Drawing.Size(143, 24)
+        Me.btnStopService.Size = New System.Drawing.Size(143, 30)
         Me.btnStopService.TabIndex = 8
         Me.btnStopService.Text = "Detener el Servicio"
         Me.btnStopService.UseVisualStyleBackColor = True
@@ -155,7 +161,7 @@ Partial Class Form1
         Me.lblServiceStatus.AutoSize = True
         Me.lblServiceStatus.Location = New System.Drawing.Point(13, 23)
         Me.lblServiceStatus.Name = "lblServiceStatus"
-        Me.lblServiceStatus.Size = New System.Drawing.Size(109, 17)
+        Me.lblServiceStatus.Size = New System.Drawing.Size(104, 16)
         Me.lblServiceStatus.TabIndex = 7
         Me.lblServiceStatus.Text = "lblServiceStatus"
         '
@@ -166,9 +172,9 @@ Partial Class Form1
         Me.GroupBox1.Controls.Add(Me.btnStopService)
         Me.GroupBox1.Controls.Add(Me.btnUninstallService)
         Me.GroupBox1.Controls.Add(Me.btnInstallService)
-        Me.GroupBox1.Location = New System.Drawing.Point(16, 12)
+        Me.GroupBox1.Location = New System.Drawing.Point(17, 12)
         Me.GroupBox1.Name = "GroupBox1"
-        Me.GroupBox1.Size = New System.Drawing.Size(592, 84)
+        Me.GroupBox1.Size = New System.Drawing.Size(592, 109)
         Me.GroupBox1.TabIndex = 9
         Me.GroupBox1.TabStop = False
         Me.GroupBox1.Text = "Servicio de windows"
@@ -176,32 +182,84 @@ Partial Class Form1
         'txtLogOutput
         '
         Me.txtLogOutput.Location = New System.Drawing.Point(12, 453)
-        Me.txtLogOutput.Multiline = True
         Me.txtLogOutput.Name = "txtLogOutput"
-        Me.txtLogOutput.ScrollBars = System.Windows.Forms.ScrollBars.Both
-        Me.txtLogOutput.Size = New System.Drawing.Size(884, 179)
-        Me.txtLogOutput.TabIndex = 10
+        Me.txtLogOutput.Size = New System.Drawing.Size(916, 179)
+        Me.txtLogOutput.TabIndex = 11
+        Me.txtLogOutput.Text = ""
         '
         'Label3
         '
         Me.Label3.AutoSize = True
-        Me.Label3.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Label3.Location = New System.Drawing.Point(13, 420)
         Me.Label3.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.Label3.Name = "Label3"
-        Me.Label3.Size = New System.Drawing.Size(145, 20)
-        Me.Label3.TabIndex = 11
+        Me.Label3.Size = New System.Drawing.Size(104, 16)
+        Me.Label3.TabIndex = 12
         Me.Label3.Text = "Log del Servicio"
+        '
+        'StatusStrip1
+        '
+        Me.StatusStrip1.ImageScalingSize = New System.Drawing.Size(20, 20)
+        Me.StatusStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.lblProgressStatus, Me.ProgressBar1})
+        Me.StatusStrip1.Location = New System.Drawing.Point(0, 659)
+        Me.StatusStrip1.Name = "StatusStrip1"
+        Me.StatusStrip1.Size = New System.Drawing.Size(941, 22)
+        Me.StatusStrip1.TabIndex = 13
+        Me.StatusStrip1.Text = "StatusStrip1"
+        '
+        'lblProgressStatus
+        '
+        Me.lblProgressStatus.Name = "lblProgressStatus"
+        Me.lblProgressStatus.Size = New System.Drawing.Size(153, 20)
+        Me.lblProgressStatus.Text = "ToolStripStatusLabel1"
+        Me.lblProgressStatus.Visible = False
+        '
+        'ProgressBar1
+        '
+        Me.ProgressBar1.Name = "ProgressBar1"
+        Me.ProgressBar1.Size = New System.Drawing.Size(200, 18)
+        Me.ProgressBar1.Visible = False
+        '
+        'GroupBoxConfig
+        '
+        Me.GroupBoxConfig.Controls.Add(Me.btnExportConfig)
+        Me.GroupBoxConfig.Controls.Add(Me.btnImportConfig)
+        Me.GroupBoxConfig.Controls.Add(Me.btnSettings)
+        Me.GroupBoxConfig.Location = New System.Drawing.Point(619, 12)
+        Me.GroupBoxConfig.Name = "GroupBoxConfig"
+        Me.GroupBoxConfig.Size = New System.Drawing.Size(309, 109)
+        Me.GroupBoxConfig.TabIndex = 10
+        Me.GroupBoxConfig.TabStop = False
+        Me.GroupBoxConfig.Text = "Configuración"
+        '
+        'btnExportConfig
+        '
+        Me.btnExportConfig.Location = New System.Drawing.Point(14, 50)
+        Me.btnExportConfig.Name = "btnExportConfig"
+        Me.btnExportConfig.Size = New System.Drawing.Size(75, 37)
+        Me.btnExportConfig.TabIndex = 0
+        Me.btnExportConfig.Text = "Exportar"
+        Me.btnExportConfig.UseVisualStyleBackColor = True
+        '
+        'btnImportConfig
+        '
+        Me.btnImportConfig.Location = New System.Drawing.Point(95, 51)
+        Me.btnImportConfig.Name = "btnImportConfig"
+        Me.btnImportConfig.Size = New System.Drawing.Size(75, 37)
+        Me.btnImportConfig.TabIndex = 1
+        Me.btnImportConfig.Text = "Importar"
+        Me.btnImportConfig.UseVisualStyleBackColor = True
         '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(912, 644)
+        Me.ClientSize = New System.Drawing.Size(941, 681)
+        Me.Controls.Add(Me.GroupBoxConfig)
+        Me.Controls.Add(Me.StatusStrip1)
         Me.Controls.Add(Me.Label3)
         Me.Controls.Add(Me.txtLogOutput)
         Me.Controls.Add(Me.GroupBox1)
-        Me.Controls.Add(Me.btnSettings)
         Me.Controls.Add(Me.Label1)
         Me.Controls.Add(Me.btnBackupNow)
         Me.Controls.Add(Me.btnDelete)
@@ -217,6 +275,9 @@ Partial Class Form1
         CType(Me.dgvServers, System.ComponentModel.ISupportInitialize).EndInit()
         Me.GroupBox1.ResumeLayout(False)
         Me.GroupBox1.PerformLayout()
+        Me.StatusStrip1.ResumeLayout(False)
+        Me.StatusStrip1.PerformLayout()
+        Me.GroupBoxConfig.ResumeLayout(False)
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -236,6 +297,14 @@ Partial Class Form1
     Friend WithEvents btnStopService As Button
     Friend WithEvents lblServiceStatus As Label
     Friend WithEvents GroupBox1 As GroupBox
-    Friend WithEvents txtLogOutput As TextBox
+    Friend WithEvents txtLogOutput As RichTextBox
     Friend WithEvents Label3 As Label
+    Friend WithEvents StatusStrip1 As StatusStrip
+    Friend WithEvents ProgressBar1 As ToolStripProgressBar
+    Friend WithEvents lblProgressStatus As ToolStripStatusLabel
+    Friend WithEvents GroupBoxConfig As GroupBox
+    Friend WithEvents btnExportConfig As Button
+    Friend WithEvents btnImportConfig As Button
+
+
 End Class

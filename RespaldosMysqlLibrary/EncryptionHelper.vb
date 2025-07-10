@@ -1,84 +1,57 @@
-Imports System.IO
 Imports System.Security.Cryptography
 Imports System.Text
 
 Public Class EncryptionHelper
 
-    Private Const AES_KEY_SIZE As Integer = 256
-    Private Const AES_BLOCK_SIZE As Integer = 128
-    Private Const PBKDF2_ITERATIONS As Integer = 10000 ' Recommended iterations for PBKDF2
+    ' Un "salt" opcional para añadir una capa extra de seguridad. 
+    ' Puede ser cualquier valor, pero debe ser el mismo para cifrar y descifrar.
+    Private Shared ReadOnly salt As Byte() = Encoding.UTF8.GetBytes("RespaldosSalt")
 
-    Public Shared Function Encrypt(plainText As String, password As String) As String
-        Using aesAlg As New AesCryptoServiceProvider()
-            aesAlg.KeySize = AES_KEY_SIZE
-            aesAlg.BlockSize = AES_BLOCK_SIZE
-            aesAlg.Mode = CipherMode.CBC
-            aesAlg.Padding = PaddingMode.PKCS7
+    Public Shared Function Encrypt(plainText As String) As String
+        If String.IsNullOrEmpty(plainText) Then
+            Return String.Empty
+        End If
 
-            ' Generate a random salt for key derivation
-            Dim salt(15) As Byte
-            Using rng As New RNGCryptoServiceProvider()
-                rng.GetBytes(salt)
-            End Using
+        Try
+            ' Convertir el texto plano a bytes
+            Dim data As Byte() = Encoding.UTF8.GetBytes(plainText)
 
-            ' Derive key and IV from password and salt
-            Using rfc2898 As New Rfc2898DeriveBytes(password, salt, PBKDF2_ITERATIONS)
-                aesAlg.Key = rfc2898.GetBytes(aesAlg.KeySize / 8)
-                aesAlg.IV = rfc2898.GetBytes(aesAlg.BlockSize / 8)
-            End Using
+            ' Cifrar los datos usando DPAPI a nivel de máquina
+            Dim encryptedData As Byte() = ProtectedData.Protect(data, salt, DataProtectionScope.LocalMachine)
 
-            Using encryptor As ICryptoTransform = aesAlg.CreateEncryptor(aesAlg.Key, aesAlg.IV)
-                Using msEncrypt As New MemoryStream()
-                    Using csEncrypt As New CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write)
-                        Using swEncrypt As New StreamWriter(csEncrypt)
-                            swEncrypt.Write(plainText)
-                        End Using
-                        Dim encryptedBytes As Byte() = msEncrypt.ToArray()
-
-                        ' Prepend salt to the encrypted bytes for decryption
-                        Dim result(salt.Length + encryptedBytes.Length - 1) As Byte
-                        Buffer.BlockCopy(salt, 0, result, 0, salt.Length)
-                        Buffer.BlockCopy(encryptedBytes, 0, result, salt.Length, encryptedBytes.Length)
-
-                        Return Convert.ToBase64String(result)
-                    End Using
-                End Using
-            End Using
-        End Using
+            ' Devolver los datos cifrados como una cadena Base64 para un almacenamiento seguro en XML
+            Return Convert.ToBase64String(encryptedData)
+        Catch ex As CryptographicException
+            AppLogger.Log($"Error de criptografía al encriptar: {ex.Message}", "ERROR")
+            ' En caso de error, devolver el texto original podría ser un riesgo de seguridad.
+            ' Es mejor lanzar la excepción para que la capa superior decida cómo manejarla.
+            Throw
+        End Try
     End Function
 
-    Public Shared Function Decrypt(cipherText As String, password As String) As String
-        Dim fullCipherBytes As Byte() = Convert.FromBase64String(cipherText)
+    Public Shared Function Decrypt(encryptedText As String) As String
+        If String.IsNullOrEmpty(encryptedText) Then
+            Return String.Empty
+        End If
 
-        ' Extract salt from the beginning of the cipher bytes
-        Dim salt(15) As Byte
-        Buffer.BlockCopy(fullCipherBytes, 0, salt, 0, salt.Length)
+        Try
+            ' Convertir la cadena Base64 de nuevo a bytes
+            Dim encryptedData As Byte() = Convert.FromBase64String(encryptedText)
 
-        Dim encryptedBytes(fullCipherBytes.Length - salt.Length - 1) As Byte
-        Buffer.BlockCopy(fullCipherBytes, salt.Length, encryptedBytes, 0, encryptedBytes.Length)
+            ' Descifrar los datos usando DPAPI
+            Dim data As Byte() = ProtectedData.Unprotect(encryptedData, salt, DataProtectionScope.LocalMachine)
 
-        Using aesAlg As New AesCryptoServiceProvider()
-            aesAlg.KeySize = AES_KEY_SIZE
-            aesAlg.BlockSize = AES_BLOCK_SIZE
-            aesAlg.Mode = CipherMode.CBC
-            aesAlg.Padding = PaddingMode.PKCS7
-
-            ' Derive key and IV from password and salt
-            Using rfc2898 As New Rfc2898DeriveBytes(password, salt, PBKDF2_ITERATIONS)
-                aesAlg.Key = rfc2898.GetBytes(aesAlg.KeySize / 8)
-                aesAlg.IV = rfc2898.GetBytes(aesAlg.BlockSize / 8)
-            End Using
-
-            Using decryptor As ICryptoTransform = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV)
-                Using msDecrypt As New MemoryStream(encryptedBytes)
-                    Using csDecrypt As New CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read)
-                        Using srDecrypt As New StreamReader(csDecrypt)
-                            Return srDecrypt.ReadToEnd()
-                        End Using
-                    End Using
-                End Using
-            End Using
-        End Using
+            ' Devolver los datos descifrados como una cadena de texto plano
+            Return Encoding.UTF8.GetString(data)
+        Catch ex As FormatException
+            ' Esto ocurre si la cadena no es un Base64 válido, lo que significa que probablemente no estaba encriptada.
+            AppLogger.Log($"Error de formato al intentar desencriptar. La contraseña podría no estar encriptada. {ex.Message}", "WARNING")
+            Return encryptedText ' Devolver el texto original
+        Catch ex As CryptographicException
+            AppLogger.Log($"Error de criptografía al desencriptar: {ex.Message}. ¿Se está ejecutando en la misma máquina donde se encriptó?", "ERROR")
+            ' Si falla el descifrado, es un problema serio.
+            Throw
+        End Try
     End Function
 
 End Class

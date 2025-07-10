@@ -21,7 +21,8 @@ Public Class BackupService
         Me.ServiceName = "RespaldosMysqlService"
         Me.CanStop = True
         Me.CanPauseAndContinue = False
-        Me.AutoLog = True ' Deshabilitar el registro automático en el Visor de Eventos de Windows
+        Me.AutoLog = True
+        AppLogger.LogBasePath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)
         AppLogger.Log("Iniciando servicio de respaldo MySQL", "SERVICE_LIFECYCLE")
     End Sub
     Protected Overrides Sub OnStart(ByVal args() As String)
@@ -64,56 +65,49 @@ Public Class BackupService
             ' Load initial configuration
             backupManager.LoadServers(configFilePath)
             AppLogger.Log("Configuración inicial del servicio: Configuración de servidores cargada con éxito.", "SERVICE_SETUP")
+            backupManager.CheckForMissedBackups()
         Catch ex As Exception
             AppLogger.Log($"Configuración inicial del servicio: Error durante la configuración inicial del servicio: {ex.Message}", "ERROR")
         End Try
     End Sub
     Private Sub OnTimerTick(sender As Object, e As ElapsedEventArgs)
-        Try
-            If isChecking Then
-                AppLogger.Log("OnTimerTick: Saltando el ciclo ya que una verificación ya está en curso.", "TIMER_TICK")
-                Return
-            End If
+        If isChecking Then
+            AppLogger.Log("Saltando ciclo de temporizador porque la comprobación anterior sigue en curso.", "WARNING")
+            Return
+        End If
 
+        Try
             isChecking = True
-            AppLogger.Log("OnTimerTick: Iniciando la verificación de respaldo programado.", "TIMER_TICK")
 
             Dim servers As List(Of Server) = backupManager.GetServers()
-            AppLogger.Log($"OnTimerTick: Se recuperaron {servers.Count} servidores para la verificación.", "TIMER_TICK")
             Dim now As DateTime = DateTime.Now
-            Dim currentDay As Integer = CInt(now.DayOfWeek) ' 0=Sunday, 1=Monday, ..., 6=Saturday
+            Dim currentDay As Integer = CInt(now.DayOfWeek)
             Dim currentTime As String = now.ToString("HH:mm")
 
             For Each server As Server In servers
-                AppLogger.Log($"OnTimerTick: Verificando servidor {server.Name} (Habilitado: {server.Schedule.Enabled}, Días: {String.Join(",", server.Schedule.Days)}, Hora: {server.Schedule.Time}). Día actual: {currentDay}, Hora actual: {currentTime}", "TIMER_TICK")
-                If server.Schedule.Enabled Then
-                    If server.Schedule.Days.Contains(currentDay) AndAlso server.Schedule.Time = currentTime Then
-                        AppLogger.Log($"OnTimerTick: Respaldo programado activado para el servidor: {server.Name}. Iniciando respaldo.", "BACKUP_JOB")
-                        Dim backupPath As String = backupManager.BackupDestinationPath ' Get path from BackupManager
-
-                        ' Run backup in a separate thread to not block the timer
-                        Dim backupThread As New Thread(Sub()
-                                                           Try
-                                                               AppLogger.Log($"Hilo de respaldo: Iniciando respaldo para {server.Name}.", "BACKUP_JOB_THREAD")
-                                                               Dim success As Boolean = backupManager.PerformBackup(server, backupPath, True)
-                                                               If success Then
-                                                                   AppLogger.Log($"Hilo de respaldo: Respaldo para el servidor {server.Name} completado con éxito.", "BACKUP_JOB_THREAD")
-                                                               Else
-                                                                   AppLogger.Log($"Hilo de respaldo: Respaldo para el servidor {server.Name} falló.", "BACKUP_JOB_THREAD")
-                                                               End If
-                                                           Catch exThread As Exception
-                                                               AppLogger.Log($"Hilo de respaldo: Excepción no controlada durante el respaldo para {server.Name}: {exThread.Message}", "ERROR")
-                                                           End Try
-                                                       End Sub)
-                        backupThread.Start()
-                    End If
+                If server.Schedule.Enabled AndAlso server.Schedule.Days.Contains(currentDay) AndAlso server.Schedule.Time = currentTime Then
+                    AppLogger.Log($"Respaldo programado activado para el servidor: {server.Name}.", "BACKUP_JOB")
+                    
+                    Dim backupPath As String = backupManager.BackupDestinationPath
+                    Dim backupThread As New Thread(Sub()
+                                                       Try
+                                                           Dim success As Boolean = backupManager.PerformBackup(server, backupPath, True)
+                                                           If success Then
+                                                               AppLogger.Log($"Respaldo para el servidor {server.Name} completado con éxito.", "BACKUP_JOB")
+                                                           Else
+                                                               AppLogger.Log($"Respaldo para el servidor {server.Name} falló. Revise los logs de error para más detalles.", "ERROR")
+                                                           End If
+                                                       Catch exThread As Exception
+                                                           AppLogger.Log($"Excepción no controlada durante el respaldo para {server.Name}: {exThread.Message}", "ERROR")
+                                                       End Try
+                                                   End Sub)
+                    backupThread.Start()
                 End If
             Next
         Catch ex As Exception
-            AppLogger.Log($"OnTimerTick: Ocurrió un error durante la verificación del temporizador: {ex.Message}", "ERROR")
+            AppLogger.Log($"Error crítico en el ciclo del temporizador del servicio: {ex.Message}", "ERROR")
         Finally
             isChecking = False
-            AppLogger.Log("OnTimerTick: Verificación de respaldo programado finalizada.", "TIMER_TICK")
         End Try
     End Sub
 
@@ -144,4 +138,6 @@ Public Class BackupService
             AppLogger.Log($"Error al recargar la configuración del servidor: {ex.Message}", "ERROR")
         End Try
     End Sub
+
+
 End Class
