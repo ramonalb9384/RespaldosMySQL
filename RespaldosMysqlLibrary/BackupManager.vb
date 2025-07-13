@@ -157,8 +157,8 @@ Public Class BackupManager
                     AppLogger.Log($"Directorio creado: {dbSpecificPath}", "BACKUP")
                 End If
 
-                Dim command As String = $"""{MySqlDumpPath}"" -h {server.IP} -P {server.Port} -u {server.User} --password={passwordToUse} {dbName} > ""{fullSpecificBackupPath}"""
-                Dim commandForLog As String = $"""{MySqlDumpPath}"" -h {server.IP} -P {server.Port} -u {server.User} --password=***** {dbName} > ""{fullSpecificBackupPath}"""
+                Dim command As String = $"""{MySqlDumpPath}"" -h {server.IP} -P {server.Port} -u {server.User} --password={passwordToUse} {server.Parameters} {dbName} > ""{fullSpecificBackupPath}"""
+                Dim commandForLog As String = $"""{MySqlDumpPath}"" -h {server.IP} -P {server.Port} -u {server.User} --password=***** {server.Parameters} {dbName} > ""{fullSpecificBackupPath}"""
 
                 AppLogger.Log($"Ejecutando comando mysqldump para {dbName}: {commandForLog}", "BACKUP")
                 Dim processInfo As New ProcessStartInfo("cmd.exe")
@@ -342,6 +342,13 @@ Public Class BackupManager
                 server.User = serverNode.SelectSingleNode("User").InnerText
                 server.Password = serverNode.SelectSingleNode("Password").InnerText
 
+                Dim parametersNode As Xml.XmlNode = serverNode.SelectSingleNode("Parameters")
+                If parametersNode IsNot Nothing Then
+                    server.Parameters = parametersNode.InnerText
+                Else
+                    server.Parameters = "" ' Valor por defecto si no se encuentra
+                End If
+
                 For Each dbNode As Xml.XmlNode In serverNode.SelectNodes("Databases/Database")
                     server.Databases.Add(dbNode.InnerText)
                 Next
@@ -521,6 +528,10 @@ Public Class BackupManager
             passwordNode.InnerText = server.Password
             serverNode.AppendChild(passwordNode)
 
+            Dim parametersNode = doc.CreateElement("Parameters")
+            parametersNode.InnerText = server.Parameters
+            serverNode.AppendChild(parametersNode)
+
             Dim dbsNode As XmlNode = doc.CreateElement("Databases")
             For Each dbName As String In server.Databases
                 Dim dbNode = doc.CreateElement("Database")
@@ -608,6 +619,7 @@ Public Class BackupManager
             existingServer.Port = server.Port
             existingServer.User = server.User
             existingServer.Password = server.Password
+            existingServer.Parameters = server.Parameters
             existingServer.IsPasswordEncrypted = server.IsPasswordEncrypted
             existingServer.Databases = server.Databases
             existingServer.ExcludedDatabases = server.ExcludedDatabases
@@ -782,6 +794,10 @@ Public Class Server
     ''' Obtiene o establece la contraseña para la conexión al servidor MySQL.
     ''' </summary>
     Public Property Password As String
+    ''' <summary>
+    ''' Obtiene o establece los parámetros adicionales para mysqldump.
+    ''' </summary>
+    Public Property Parameters As String
     ''' <summary>
     ''' Obtiene la lista de bases de datos específicas a respaldar para este servidor.
     ''' Si está vacía, se respaldarán todas las bases de datos (excepto las excluidas).

@@ -222,7 +222,7 @@ Public Class Form1
 
 
 
-    Private Sub btnBackupNow_Click(sender As Object, e As EventArgs) Handles btnBackupNow.Click
+    Private Async Sub btnBackupNow_Click(sender As Object, e As EventArgs) Handles btnBackupNow.Click
         AppLogger.Log("Botón 'Respaldar Ahora' presionado.", "UI")
         If dgvServers.SelectedRows.Count = 0 Then
             MessageBox.Show("Por favor, seleccione un servidor para respaldar.", "Ningún Servidor Seleccionado", MessageBoxButtons.OK, MessageBoxIcon.Information)
@@ -246,7 +246,16 @@ Public Class Form1
             End If
         End Using
 
-        backupManager.PerformBackup(selectedServer, backupPath, False)
+        btnBackupNow.Enabled = False
+        Me.Cursor = Cursors.WaitCursor
+
+        Await Task.Run(Sub()
+                           backupManager.PerformBackup(selectedServer, backupPath, False)
+                       End Sub)
+
+        btnBackupNow.Enabled = True
+        Me.Cursor = Cursors.Default
+
         MessageBox.Show("Proceso de respaldo finalizado.", "Proceso Finalizado", MessageBoxButtons.OK, MessageBoxIcon.Information)
         AppLogger.Log("Proceso de respaldo finalizado.", "UI")
     End Sub

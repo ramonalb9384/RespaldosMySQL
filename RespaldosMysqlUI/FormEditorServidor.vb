@@ -27,6 +27,7 @@ Public Class FormEditorServidor
                 .Port = 3306, ' Puerto por defecto
                 .User = "",
                 .Password = "",
+                .Parameters = "",
                 .Databases = New List(Of String), ' This will now be empty as we're not selecting specific DBs to backup
                 .ExcludedDatabases = New List(Of String), ' Initialize new list
                 .Schedule = New ScheduleInfo With {.Enabled = False, .Days = New List(Of Integer), .Time = "22:00"}
@@ -53,6 +54,8 @@ Public Class FormEditorServidor
         Else
             txtPassword.Text = ServerData.Password
         End If
+
+        txtParameters.Text = ServerData.Parameters
 
         ' Cargar configuración de la programación
         chkScheduleEnabled.Checked = ServerData.Schedule.Enabled
@@ -161,6 +164,7 @@ Public Class FormEditorServidor
         ServerData.IP = txtIP.Text
         ServerData.Port = Integer.Parse(txtPort.Text)
         ServerData.User = txtUser.Text
+        ServerData.Parameters = txtParameters.Text
 
         If BackupManagerInstance.EncryptPasswords Then
             Try

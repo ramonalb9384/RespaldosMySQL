@@ -11,6 +11,8 @@
 ## Características
 
 *   **Respaldo Automatizado**: El servicio de Windows realiza respaldos de MySQL de forma programada.
+*   **Parámetros Adicionales para mysqldump**: Permite agregar parámetros personalizados al comando `mysqldump` para mayor flexibilidad en los respaldos.
+*   **Respaldo Manual Asíncrono**: La interfaz de usuario ya no se congela durante los respaldos manuales.
 *   **Respaldos por Evento**: Permite programar respaldos únicos para fechas y horas específicas, ideales para ventanas de mantenimiento o eventos puntuales.
 *   **Configuración Flexible**: Permite añadir múltiples servidores MySQL con configuraciones individuales.
 *   **Programación Detallada**: Define horarios específicos y días de la semana para cada respaldo.
@@ -81,7 +83,7 @@ Antes de compilar y ejecutar la aplicación, asegúrate de tener instalado lo si
     *   En el editor de servidores, puedes seleccionar las bases de datos a excluir del respaldo.
     *   Configura el horario de respaldo (habilitar, días de la semana, hora).
 *   **Respaldo Manual**:
-    *   Selecciona un servidor y haz clic en "Respaldar Ahora" para iniciar un respaldo manual inmediato. Se te pedirá que elijas la carpeta de destino.
+    *   Selecciona un servidor y haz clic en "Respaldar Ahora" para iniciar un respaldo manual inmediato. Se te pedirá que elijas la carpeta de destino. La interfaz de usuario no se bloqueará durante este proceso.
 *   **Configuración Global**:
     *   Haz clic en "Configuración" para ajustar las rutas globales de `mysqldump.exe`, `7z.exe` y la carpeta de destino de los respaldos.
 *   **Control del Servicio**:
@@ -123,6 +125,8 @@ Si `mysqldump` se ejecuta con la opción `--single-transaction` (recomendado par
 
 ## Solución de Problemas Comunes
 
+*   **La interfaz de usuario se congela durante el respaldo manual**:
+    *   Este problema ha sido solucionado. Si todavía experimentas este problema, asegúrate de tener la última versión del código.
 *   **Servicio no se inicia**:
     *   Verifica el log en la UI o en el Visor de Eventos de Windows para mensajes de error.
     *   Asegúrate de que las rutas a `mysqldump.exe` y `7z.exe` en `servers.xml` sean correctas.

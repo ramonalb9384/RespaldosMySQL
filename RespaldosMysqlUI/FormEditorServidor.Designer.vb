@@ -60,6 +60,8 @@ Partial Class FormEditorServidor
         Me.dtpFinVentana = New System.Windows.Forms.DateTimePicker()
         Me.dtpInicioVentana = New System.Windows.Forms.DateTimePicker()
         Me.chkOmitirVentana = New System.Windows.Forms.CheckBox()
+        Me.Label11 = New System.Windows.Forms.Label()
+        Me.txtParameters = New System.Windows.Forms.TextBox()
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
         Me.pnlScheduleDays.SuspendLayout()
@@ -163,7 +165,7 @@ Partial Class FormEditorServidor
         Me.GroupBox1.Controls.Add(Me.lblExclusionInfo)
         Me.GroupBox1.Controls.Add(Me.btnGetDbs)
         Me.GroupBox1.Controls.Add(Me.clbDatabases)
-        Me.GroupBox1.Location = New System.Drawing.Point(19, 210)
+        Me.GroupBox1.Location = New System.Drawing.Point(19, 252)
         Me.GroupBox1.Name = "GroupBox1"
         Me.GroupBox1.Size = New System.Drawing.Size(500, 307)
         Me.GroupBox1.TabIndex = 10
@@ -351,7 +353,7 @@ Partial Class FormEditorServidor
         '
         'btnSave
         '
-        Me.btnSave.Location = New System.Drawing.Point(792, 524)
+        Me.btnSave.Location = New System.Drawing.Point(792, 529)
         Me.btnSave.Margin = New System.Windows.Forms.Padding(4)
         Me.btnSave.Name = "btnSave"
         Me.btnSave.Size = New System.Drawing.Size(100, 28)
@@ -362,7 +364,7 @@ Partial Class FormEditorServidor
         'btnCancel
         '
         Me.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel
-        Me.btnCancel.Location = New System.Drawing.Point(901, 524)
+        Me.btnCancel.Location = New System.Drawing.Point(901, 529)
         Me.btnCancel.Margin = New System.Windows.Forms.Padding(4)
         Me.btnCancel.Name = "btnCancel"
         Me.btnCancel.Size = New System.Drawing.Size(100, 28)
@@ -372,6 +374,8 @@ Partial Class FormEditorServidor
         '
         'GroupBox3
         '
+        Me.GroupBox3.Controls.Add(Me.txtParameters)
+        Me.GroupBox3.Controls.Add(Me.Label11)
         Me.GroupBox3.Controls.Add(Me.Label1)
         Me.GroupBox3.Controls.Add(Me.txtName)
         Me.GroupBox3.Controls.Add(Me.Label2)
@@ -384,7 +388,7 @@ Partial Class FormEditorServidor
         Me.GroupBox3.Controls.Add(Me.txtUser)
         Me.GroupBox3.Location = New System.Drawing.Point(16, 12)
         Me.GroupBox3.Name = "GroupBox3"
-        Me.GroupBox3.Size = New System.Drawing.Size(503, 192)
+        Me.GroupBox3.Size = New System.Drawing.Size(503, 221)
         Me.GroupBox3.TabIndex = 14
         Me.GroupBox3.TabStop = False
         Me.GroupBox3.Text = "Conexión al Servidor"
@@ -397,7 +401,7 @@ Partial Class FormEditorServidor
         Me.GroupBox4.Controls.Add(Me.dtpFinVentana)
         Me.GroupBox4.Controls.Add(Me.dtpInicioVentana)
         Me.GroupBox4.Controls.Add(Me.chkOmitirVentana)
-        Me.GroupBox4.Location = New System.Drawing.Point(526, 211)
+        Me.GroupBox4.Location = New System.Drawing.Point(526, 217)
         Me.GroupBox4.Name = "GroupBox4"
         Me.GroupBox4.Size = New System.Drawing.Size(473, 306)
         Me.GroupBox4.TabIndex = 15
@@ -460,6 +464,22 @@ Partial Class FormEditorServidor
         Me.chkOmitirVentana.TabIndex = 0
         Me.chkOmitirVentana.Text = "Omitir respaldos automáticos en una ventana de"
         Me.chkOmitirVentana.UseVisualStyleBackColor = True
+        '
+        'Label11
+        '
+        Me.Label11.AutoSize = True
+        Me.Label11.Location = New System.Drawing.Point(12, 165)
+        Me.Label11.Name = "Label11"
+        Me.Label11.Size = New System.Drawing.Size(297, 16)
+        Me.Label11.TabIndex = 10
+        Me.Label11.Text = "Parámetros Adicionales (al ejecutar mysqldump)"
+        '
+        'txtParameters
+        '
+        Me.txtParameters.Location = New System.Drawing.Point(12, 193)
+        Me.txtParameters.Name = "txtParameters"
+        Me.txtParameters.Size = New System.Drawing.Size(475, 22)
+        Me.txtParameters.TabIndex = 11
         '
         'FormEditorServidor
         '
@@ -531,4 +551,6 @@ Partial Class FormEditorServidor
     Friend WithEvents chkOmitirVentana As CheckBox
     Friend WithEvents Label9 As Label
     Friend WithEvents Label10 As Label
+    Friend WithEvents txtParameters As TextBox
+    Friend WithEvents Label11 As Label
 End Class
