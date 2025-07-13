@@ -79,6 +79,11 @@ Public Class FormEditorServidor
 
         UpdateOmissionControls()
 
+        ' Cargar configuración de ntfy
+        chkNtfyEnabled.Checked = ServerData.NtfyEnabled
+        txtNtfyTopic.Text = ServerData.NtfyTopic
+        UpdateNtfyControls()
+
         ' Populate clbDatabases with all databases from the server and check excluded ones
         If isEditMode Then
             ' We need to get all databases from the server first, then mark the excluded ones.
@@ -207,6 +212,10 @@ Public Class FormEditorServidor
         ServerData.InicioVentana = dtpInicioVentana.Value.TimeOfDay
         ServerData.FinVentana = dtpFinVentana.Value.TimeOfDay
 
+        ' Guardar configuración de ntfy
+        ServerData.NtfyEnabled = chkNtfyEnabled.Checked
+        ServerData.NtfyTopic = txtNtfyTopic.Text
+
         Me.DialogResult = DialogResult.OK
         Me.Close()
         AppLogger.Log($"FormEditorServidor closed. Server '{ServerData.Name}' data saved.", "UI")
@@ -228,6 +237,15 @@ Public Class FormEditorServidor
     Private Sub UpdateOmissionControls()
         dtpInicioVentana.Enabled = chkOmitirVentana.Checked
         dtpFinVentana.Enabled = chkOmitirVentana.Checked
+    End Sub
+
+    Private Sub chkNtfyEnabled_CheckedChanged(sender As Object, e As EventArgs) Handles chkNtfyEnabled.CheckedChanged
+        UpdateNtfyControls()
+    End Sub
+
+    Private Sub UpdateNtfyControls()
+        txtNtfyTopic.Enabled = chkNtfyEnabled.Checked
+        lblNtfyTopic.Enabled = chkNtfyEnabled.Checked
     End Sub
 
 End Class

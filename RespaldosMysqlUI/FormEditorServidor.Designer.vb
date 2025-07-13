@@ -53,6 +53,8 @@ Partial Class FormEditorServidor
         Me.btnSave = New System.Windows.Forms.Button()
         Me.btnCancel = New System.Windows.Forms.Button()
         Me.GroupBox3 = New System.Windows.Forms.GroupBox()
+        Me.txtParameters = New System.Windows.Forms.TextBox()
+        Me.Label11 = New System.Windows.Forms.Label()
         Me.GroupBox4 = New System.Windows.Forms.GroupBox()
         Me.Label10 = New System.Windows.Forms.Label()
         Me.Label9 = New System.Windows.Forms.Label()
@@ -60,13 +62,16 @@ Partial Class FormEditorServidor
         Me.dtpFinVentana = New System.Windows.Forms.DateTimePicker()
         Me.dtpInicioVentana = New System.Windows.Forms.DateTimePicker()
         Me.chkOmitirVentana = New System.Windows.Forms.CheckBox()
-        Me.Label11 = New System.Windows.Forms.Label()
-        Me.txtParameters = New System.Windows.Forms.TextBox()
+        Me.gbNtfy = New System.Windows.Forms.GroupBox()
+        Me.txtNtfyTopic = New System.Windows.Forms.TextBox()
+        Me.lblNtfyTopic = New System.Windows.Forms.Label()
+        Me.chkNtfyEnabled = New System.Windows.Forms.CheckBox()
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
         Me.pnlScheduleDays.SuspendLayout()
         Me.GroupBox3.SuspendLayout()
         Me.GroupBox4.SuspendLayout()
+        Me.gbNtfy.SuspendLayout()
         Me.SuspendLayout()
         '
         'Label1
@@ -353,7 +358,7 @@ Partial Class FormEditorServidor
         '
         'btnSave
         '
-        Me.btnSave.Location = New System.Drawing.Point(792, 529)
+        Me.btnSave.Location = New System.Drawing.Point(792, 637)
         Me.btnSave.Margin = New System.Windows.Forms.Padding(4)
         Me.btnSave.Name = "btnSave"
         Me.btnSave.Size = New System.Drawing.Size(100, 28)
@@ -364,7 +369,7 @@ Partial Class FormEditorServidor
         'btnCancel
         '
         Me.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel
-        Me.btnCancel.Location = New System.Drawing.Point(901, 529)
+        Me.btnCancel.Location = New System.Drawing.Point(901, 637)
         Me.btnCancel.Margin = New System.Windows.Forms.Padding(4)
         Me.btnCancel.Name = "btnCancel"
         Me.btnCancel.Size = New System.Drawing.Size(100, 28)
@@ -392,6 +397,22 @@ Partial Class FormEditorServidor
         Me.GroupBox3.TabIndex = 14
         Me.GroupBox3.TabStop = False
         Me.GroupBox3.Text = "Conexión al Servidor"
+        '
+        'txtParameters
+        '
+        Me.txtParameters.Location = New System.Drawing.Point(12, 193)
+        Me.txtParameters.Name = "txtParameters"
+        Me.txtParameters.Size = New System.Drawing.Size(475, 22)
+        Me.txtParameters.TabIndex = 11
+        '
+        'Label11
+        '
+        Me.Label11.AutoSize = True
+        Me.Label11.Location = New System.Drawing.Point(12, 165)
+        Me.Label11.Name = "Label11"
+        Me.Label11.Size = New System.Drawing.Size(297, 16)
+        Me.Label11.TabIndex = 10
+        Me.Label11.Text = "Parámetros Adicionales (al ejecutar mysqldump)"
         '
         'GroupBox4
         '
@@ -465,21 +486,43 @@ Partial Class FormEditorServidor
         Me.chkOmitirVentana.Text = "Omitir respaldos automáticos en una ventana de"
         Me.chkOmitirVentana.UseVisualStyleBackColor = True
         '
-        'Label11
+        'gbNtfy
         '
-        Me.Label11.AutoSize = True
-        Me.Label11.Location = New System.Drawing.Point(12, 165)
-        Me.Label11.Name = "Label11"
-        Me.Label11.Size = New System.Drawing.Size(297, 16)
-        Me.Label11.TabIndex = 10
-        Me.Label11.Text = "Parámetros Adicionales (al ejecutar mysqldump)"
+        Me.gbNtfy.Controls.Add(Me.txtNtfyTopic)
+        Me.gbNtfy.Controls.Add(Me.lblNtfyTopic)
+        Me.gbNtfy.Controls.Add(Me.chkNtfyEnabled)
+        Me.gbNtfy.Location = New System.Drawing.Point(19, 565)
+        Me.gbNtfy.Name = "gbNtfy"
+        Me.gbNtfy.Size = New System.Drawing.Size(980, 65)
+        Me.gbNtfy.TabIndex = 16
+        Me.gbNtfy.TabStop = False
+        Me.gbNtfy.Text = "Notificaciones (ntfy.sh)"
         '
-        'txtParameters
+        'txtNtfyTopic
         '
-        Me.txtParameters.Location = New System.Drawing.Point(12, 193)
-        Me.txtParameters.Name = "txtParameters"
-        Me.txtParameters.Size = New System.Drawing.Size(475, 22)
-        Me.txtParameters.TabIndex = 11
+        Me.txtNtfyTopic.Location = New System.Drawing.Point(404, 27)
+        Me.txtNtfyTopic.Name = "txtNtfyTopic"
+        Me.txtNtfyTopic.Size = New System.Drawing.Size(547, 22)
+        Me.txtNtfyTopic.TabIndex = 2
+        '
+        'lblNtfyTopic
+        '
+        Me.lblNtfyTopic.AutoSize = True
+        Me.lblNtfyTopic.Location = New System.Drawing.Point(300, 30)
+        Me.lblNtfyTopic.Name = "lblNtfyTopic"
+        Me.lblNtfyTopic.Size = New System.Drawing.Size(98, 16)
+        Me.lblNtfyTopic.TabIndex = 1
+        Me.lblNtfyTopic.Text = "URL del Tema:"
+        '
+        'chkNtfyEnabled
+        '
+        Me.chkNtfyEnabled.AutoSize = True
+        Me.chkNtfyEnabled.Location = New System.Drawing.Point(12, 29)
+        Me.chkNtfyEnabled.Name = "chkNtfyEnabled"
+        Me.chkNtfyEnabled.Size = New System.Drawing.Size(276, 20)
+        Me.chkNtfyEnabled.TabIndex = 0
+        Me.chkNtfyEnabled.Text = "Habilitar notificaciones para este servidor"
+        Me.chkNtfyEnabled.UseVisualStyleBackColor = True
         '
         'FormEditorServidor
         '
@@ -487,13 +530,14 @@ Partial Class FormEditorServidor
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.CancelButton = Me.btnCancel
-        Me.ClientSize = New System.Drawing.Size(1011, 565)
+        Me.ClientSize = New System.Drawing.Size(1011, 678)
         Me.Controls.Add(Me.GroupBox4)
         Me.Controls.Add(Me.GroupBox3)
         Me.Controls.Add(Me.btnCancel)
         Me.Controls.Add(Me.btnSave)
         Me.Controls.Add(Me.GroupBox2)
         Me.Controls.Add(Me.GroupBox1)
+        Me.Controls.Add(Me.gbNtfy)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog
         Me.Margin = New System.Windows.Forms.Padding(4)
         Me.MaximizeBox = False
@@ -510,6 +554,8 @@ Partial Class FormEditorServidor
         Me.GroupBox3.PerformLayout()
         Me.GroupBox4.ResumeLayout(False)
         Me.GroupBox4.PerformLayout()
+        Me.gbNtfy.ResumeLayout(False)
+        Me.gbNtfy.PerformLayout()
         Me.ResumeLayout(False)
 
     End Sub
@@ -553,4 +599,8 @@ Partial Class FormEditorServidor
     Friend WithEvents Label10 As Label
     Friend WithEvents txtParameters As TextBox
     Friend WithEvents Label11 As Label
+    Friend WithEvents gbNtfy As GroupBox
+    Friend WithEvents chkNtfyEnabled As CheckBox
+    Friend WithEvents lblNtfyTopic As Label
+    Friend WithEvents txtNtfyTopic As TextBox
 End Class

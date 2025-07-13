@@ -66,6 +66,11 @@ Public Class BackupManager
     ''' ejecuta mysqldump para cada una, y luego comprime los archivos SQL resultantes usando 7-Zip.
     ''' </remarks>
     Public Function PerformBackup(server As Server, backupPath As String, isAutomatic As Boolean) As Boolean
+        ' Enviar notificación de inicio si está habilitado
+        If server.NtfyEnabled AndAlso Not String.IsNullOrWhiteSpace(server.NtfyTopic) Then
+            NotificationManager.SendNtfyNotification(server.NtfyTopic, $"Iniciando respaldo para '{server.Name}' a las {DateTime.Now:HH:mm:ss}.", "Inicio de Respaldo", 3, New String() {"hourglass"})
+        End If
+
         AppLogger.Log($"Iniciando respaldo para el servidor: {server.Name} (Automático: {isAutomatic})", "BACKUP")
 
         ' --- Comprobación de seguridad para evitar inyección de comandos ---
@@ -87,6 +92,7 @@ Public Class BackupManager
                     passwordToUse = EncryptionHelper.Decrypt(server.Password)
                 Catch ex As Exception
                     AppLogger.Log($"Error al desencriptar la contraseña para el servidor {server.Name}: {ex.Message}", "ERROR")
+                    SendBackupNotification(server, False)
                     Return False ' No se puede proceder sin la contraseña
                 End Try
             Else
@@ -114,10 +120,12 @@ Public Class BackupManager
             Catch ex As MySqlException
                 AppLogger.Log($"Error de MySQL al obtener las bases de datos del servidor {server.Name}: {ex.Message}", "ERROR")
                 Console.WriteLine($"Error de MySQL al obtener bases de datos del servidor {server.Name}: {ex.Message}")
+                SendBackupNotification(server, False)
                 Return False
             Catch ex As Exception
                 AppLogger.Log($"Excepción general al obtener las bases de datos del servidor {server.Name}: {ex.Message}", "ERROR")
                 Console.WriteLine($"Excepción general al obtener bases de datos del servidor {server.Name}: {ex.Message}")
+                SendBackupNotification(server, False)
                 Return False
             End Try
 
@@ -247,16 +255,41 @@ Public Class BackupManager
                 End If
             End If
 
+            SendBackupNotification(server, allBackupsSuccessful)
             Return allBackupsSuccessful
 
         Catch ex As Exception
             AppLogger.Log($"Excepción durante el respaldo para {server.Name}: {ex.Message}", "ERROR")
             Console.WriteLine($"Excepción durante el respaldo para {server.Name}: {ex.Message}")
+            SendBackupNotification(server, False)
             Return False
         Finally
             ProgressReporter.ClearStatus()
         End Try
     End Function
+
+    Private Sub SendBackupNotification(server As Server, success As Boolean)
+        If server.NtfyEnabled AndAlso Not String.IsNullOrWhiteSpace(server.NtfyTopic) Then
+            Dim notificationTitle As String
+            Dim notificationMessage As String
+            Dim notificationPriority As Integer
+            Dim notificationTags As String()
+
+            If success Then
+                notificationTitle = $"Respaldo Exitoso: {server.Name}"
+                notificationMessage = $"El respaldo del servidor '{server.Name}' ({server.IP}) se completó correctamente a las {DateTime.Now.ToString("HH:mm:ss")}."
+                notificationPriority = 4 ' default
+                notificationTags = New String() {"white_check_mark"}
+            Else
+                notificationTitle = $"Error de Respaldo: {server.Name}"
+                notificationMessage = $"Error en el respaldo del servidor '{server.Name}' ({server.IP}) a las {DateTime.Now.ToString("HH:mm:ss")}. Revise los logs para más detalles."
+                notificationPriority = 5 ' urgent
+                notificationTags = New String() {"x"}
+            End If
+
+            NotificationManager.SendNtfyNotification(server.NtfyTopic, notificationMessage, notificationTitle, notificationPriority, notificationTags)
+        End If
+    End Sub
 
     ''' <summary>
     ''' Carga la configuración de los servidores desde un archivo XML especificado.
@@ -383,6 +416,21 @@ Public Class BackupManager
                     server.IsPasswordEncrypted = Boolean.Parse(isEncryptedNode.InnerText)
                 Else
                     server.IsPasswordEncrypted = False ' Valor por defecto si no se encuentra
+                End If
+
+                ' Cargar configuración de ntfy
+                Dim ntfyEnabledNode As Xml.XmlNode = serverNode.SelectSingleNode("NtfyEnabled")
+                If ntfyEnabledNode IsNot Nothing Then
+                    server.NtfyEnabled = Boolean.Parse(ntfyEnabledNode.InnerText)
+                Else
+                    server.NtfyEnabled = False ' Valor por defecto
+                End If
+
+                Dim ntfyTopicNode As Xml.XmlNode = serverNode.SelectSingleNode("NtfyTopic")
+                If ntfyTopicNode IsNot Nothing Then
+                    server.NtfyTopic = ntfyTopicNode.InnerText
+                Else
+                    server.NtfyTopic = "" ' Valor por defecto
                 End If
 
                 ' Cargar eventos de respaldo
@@ -579,6 +627,15 @@ Public Class BackupManager
             isEncryptedNode.InnerText = server.IsPasswordEncrypted.ToString()
             serverNode.AppendChild(isEncryptedNode)
 
+            ' Guardar configuración de ntfy
+            Dim ntfyEnabledNode = doc.CreateElement("NtfyEnabled")
+            ntfyEnabledNode.InnerText = server.NtfyEnabled.ToString()
+            serverNode.AppendChild(ntfyEnabledNode)
+
+            Dim ntfyTopicNode = doc.CreateElement("NtfyTopic")
+            ntfyTopicNode.InnerText = server.NtfyTopic
+            serverNode.AppendChild(ntfyTopicNode)
+
             ' Guardar eventos de respaldo
             Dim eventosNode As Xml.XmlNode = doc.CreateElement("Eventos")
             For Each evento As EventoRespaldo In server.Eventos
@@ -628,6 +685,8 @@ Public Class BackupManager
             existingServer.InicioVentana = server.InicioVentana
             existingServer.FinVentana = server.FinVentana
             existingServer.Eventos = server.Eventos
+            existingServer.NtfyEnabled = server.NtfyEnabled
+            existingServer.NtfyTopic = server.NtfyTopic
         Else
             ' Add new server
             _servers.Add(server)
@@ -831,12 +890,22 @@ Public Class Server
     ''' Obtiene la lista de respaldos por evento programados para este servidor.
     ''' </summary>
     Public Property Eventos As New List(Of EventoRespaldo)
+    ''' <summary>
+    ''' Obtiene o establece un valor que indica si las notificaciones de ntfy.sh están habilitadas para este servidor.
+    ''' </summary>
+    Public Property NtfyEnabled As Boolean
+    ''' <summary>
+    ''' Obtiene o establece el tema (topic) de ntfy.sh para las notificaciones de este servidor.
+    ''' </summary>
+    Public Property NtfyTopic As String
+
 
     ''' <summary>
     ''' Inicializa una nueva instancia de la clase <see cref="Server"/>.
     ''' </summary>
     Public Sub New()
         ' Constructor
+        NtfyTopic = "" ' Inicializar la propiedad
     End Sub
 End Class
 
