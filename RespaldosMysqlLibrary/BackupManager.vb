@@ -356,11 +356,19 @@ Public Class BackupManager
                 UpdateOrCreateElement(doc, serverNode, "WindowEndTime", server.FinVentana.ToString())
 
                 Dim dbsNode = doc.CreateElement("Databases")
-                server.Databases.ForEach(Sub(db) UpdateOrCreateElement(doc, dbsNode, "Database", db))
+                For Each db As String In server.Databases
+                    Dim dbNode = doc.CreateElement("Database")
+                    dbNode.InnerText = db
+                    dbsNode.AppendChild(dbNode)
+                Next
                 serverNode.AppendChild(dbsNode)
 
                 Dim excludedDbsNode = doc.CreateElement("ExcludedDatabases")
-                server.ExcludedDatabases.ForEach(Sub(db) UpdateOrCreateElement(doc, excludedDbsNode, "Database", db))
+                For Each db As String In server.ExcludedDatabases
+                    Dim dbNode = doc.CreateElement("Database")
+                    dbNode.InnerText = db
+                    excludedDbsNode.AppendChild(dbNode)
+                Next
                 serverNode.AppendChild(excludedDbsNode)
 
                 Dim scheduleNode = doc.CreateElement("Schedule")
