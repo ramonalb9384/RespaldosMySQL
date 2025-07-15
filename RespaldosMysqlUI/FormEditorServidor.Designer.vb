@@ -460,7 +460,7 @@ Partial Class FormEditorServidor
         '
         Me.dtpFinVentana.CustomFormat = "HH:mm"
         Me.dtpFinVentana.Format = System.Windows.Forms.DateTimePickerFormat.Custom
-        Me.dtpFinVentana.Location = New System.Drawing.Point(226, 254)
+        Me.dtpFinVentana.Location = New System.Drawing.Point(229, 254)
         Me.dtpFinVentana.Name = "dtpFinVentana"
         Me.dtpFinVentana.ShowUpDown = True
         Me.dtpFinVentana.Size = New System.Drawing.Size(102, 22)

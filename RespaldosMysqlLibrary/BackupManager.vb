@@ -27,6 +27,9 @@ Public Class BackupManager
     Public Function PerformBackup(server As Server, backupPath As String, isAutomatic As Boolean) As Boolean
         AppLogger.Log($"Iniciando PerformBackup para '{server.Name}' (Automático: {isAutomatic})", "DEEP_TRACE")
 
+        ProgressReporter.ClearStatus()
+        ProgressReporter.WriteStatus($"Iniciando respaldo para '{server.Name}'...", 0)
+
         If Server.NtfyEnabled AndAlso Not String.IsNullOrWhiteSpace(Server.NtfyTopic) Then
             NotificationManager.SendNtfyNotification(Server.NtfyTopic, $"Iniciando respaldo para '{Server.Name}' a las {DateTime.Now:HH:mm:ss}.", "Inicio de Respaldo", 3, New String() {"hourglass"})
         End If
@@ -74,7 +77,7 @@ Public Class BackupManager
                             End If
                         End While
                     End Using
-                    AppLogger.Log($"Se encontraron {allDatabases.Count} bases de datos: {String.Join(", ", allDatabases)}", "DEEP_TRACE")
+                    AppLogger.Log($"Se encontraron {allDatabases.Count} bases de datos: {String.Join(", ", allDatabases)}", "BACKUP")
                 End Using
             Catch ex As Exception
                 AppLogger.Log($"Error de conexión o consulta a MySQL para '{Server.Name}': {ex.Message}", "ERROR")
@@ -84,11 +87,13 @@ Public Class BackupManager
 
             Dim excludedDbs = Server.ExcludedDatabases.Select(Function(s) s.ToLowerInvariant()).ToHashSet()
             Dim databasesToBackup = allDatabases.Where(Function(db) Not excludedDbs.Contains(db.ToLowerInvariant())).ToList()
-            AppLogger.Log($"Bases de datos a respaldar después de exclusión: {String.Join(", ", databasesToBackup)}", "DEEP_TRACE")
+            AppLogger.Log($"Bases de datos a respaldar después de exclusión: {String.Join(", ", databasesToBackup)}", "BACKUP")
 
             Dim allBackupsSuccessful As Boolean = True
             For i As Integer = 0 To databasesToBackup.Count - 1
                 Dim dbName As String = databasesToBackup(i)
+                Dim progress As Integer = CInt(((i + 1) / databasesToBackup.Count) * 90) ' 90% para mysqldump, 10% para zip
+                ProgressReporter.WriteStatus($"Respaldando base de datos: {dbName} ({i + 1}/{databasesToBackup.Count})", progress)
                 If Not IsInputSafe(dbName) Then
                     AppLogger.Log($"ALERTA DE SEGURIDAD: Caracteres no válidos en el nombre de la BD '{dbName}'. Omitiendo.", "ERROR")
                     Continue For
@@ -107,7 +112,7 @@ Public Class BackupManager
 
                 Dim command As String = $"""{MySqlDumpPath}"" -h {Server.IP} -P {Server.Port} -u {Server.User} --password={passwordToUse} {Server.Parameters} {dbName} > ""{fullSpecificBackupPath}"""
                 Dim commandForLog As String = $"""{MySqlDumpPath}"" -h {Server.IP} -P {Server.Port} -u {Server.User} --password=***** {Server.Parameters} {dbName} > ""{fullSpecificBackupPath}"""
-                AppLogger.Log($"Ejecutando mysqldump para '{dbName}': {commandForLog}", "DEEP_TRACE")
+                AppLogger.Log($"Ejecutando mysqldump para '{dbName}': {commandForLog}", "BACKUP")
 
                 Dim processInfo As New ProcessStartInfo("cmd.exe") With {
                     .Arguments = $"/C ""{command}""",
@@ -121,7 +126,7 @@ Public Class BackupManager
                     process.WaitForExit()
                     Dim errorOutput As String = process.StandardError.ReadToEnd()
                     If process.ExitCode = 0 Then
-                        AppLogger.Log($"Respaldo de '{dbName}' exitoso.", "DEEP_TRACE")
+                        AppLogger.Log($"Respaldo de '{dbName}' exitoso.", "BACKUP")
                     Else
                         AppLogger.Log($"Error en mysqldump para '{dbName}' en '{Server.Name}': {errorOutput}", "ERROR")
                         allBackupsSuccessful = False
@@ -165,16 +170,19 @@ Public Class BackupManager
                             allBackupsSuccessful = False
                         End If
                     End Using
+                    ProgressReporter.WriteStatus($"Compresión finalizada para '{Server.Name}'.", 95)
                 End If
             End If
 
             SendBackupNotification(Server, allBackupsSuccessful)
-            AppLogger.Log($"PerformBackup para '{Server.Name}' finalizado. Éxito: {allBackupsSuccessful}", "DEEP_TRACE")
+            ProgressReporter.WriteStatus($"Respaldo finalizado para '{Server.Name}'.", 100)
+            AppLogger.Log($"PerformBackup para '{server.Name}' finalizado. Éxito: {allBackupsSuccessful}", "BACKUP")
             Return allBackupsSuccessful
 
         Catch ex As Exception
             AppLogger.Log($"Excepción mayor en PerformBackup para '{Server.Name}': {ex.Message}", "ERROR")
             SendBackupNotification(Server, False)
+            ProgressReporter.WriteStatus($"Error en respaldo para '{Server.Name}'.", 0)
             Return False
         End Try
     End Function
