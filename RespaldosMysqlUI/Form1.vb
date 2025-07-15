@@ -213,7 +213,7 @@ Public Class Form1
             Return
         End If
 
-        Dim selectedServer = CType(dgvServers.SelectedRows(0).DataBoundItem, Server)
+        Dim selectedServer = CType(dgvServers.SelectedRows(0).DataBoundItem, ServerDisplayInfo).Server
 
         If MessageBox.Show($"¿Está seguro de que desea eliminar el servidor '{selectedServer.Name}'?", "Confirmar Eliminación", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) = DialogResult.Yes Then
             servers.Remove(selectedServer)
@@ -237,7 +237,7 @@ Public Class Form1
             Return
         End If
 
-        Dim selectedServer = CType(dgvServers.SelectedRows(0).DataBoundItem, Server)
+        Dim selectedServer = CType(dgvServers.SelectedRows(0).DataBoundItem, ServerDisplayInfo).Server
         AppLogger.Log($"Respaldar Ahora: Servidor seleccionado '{selectedServer.Name}'.", "UI")
 
         Dim backupPath As String = backupManager.BackupDestinationPath
