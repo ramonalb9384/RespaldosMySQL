@@ -560,7 +560,7 @@ Public Class Form1
             Return
         End If
 
-        Dim selectedServer = CType(dgvServers.SelectedRows(0).DataBoundItem, Server)
+        Dim selectedServer = CType(dgvServers.SelectedRows(0).DataBoundItem, ServerDisplayInfo).Server
 
         Using form As New FormEditorEvento()
             If form.ShowDialog(Me) = DialogResult.OK Then
@@ -578,7 +578,7 @@ Public Class Form1
             Return
         End If
 
-        Dim selectedServer = CType(dgvServers.SelectedRows(0).DataBoundItem, Server)
+        Dim selectedServer = CType(dgvServers.SelectedRows(0).DataBoundItem, ServerDisplayInfo).Server
         Dim selectedEvento = CType(dgvEventos.SelectedRows(0).DataBoundItem, EventoRespaldo)
 
         Using form As New FormEditorEvento(selectedEvento)
@@ -601,7 +601,7 @@ Public Class Form1
             Return
         End If
 
-        Dim selectedServer = CType(dgvServers.SelectedRows(0).DataBoundItem, Server)
+        Dim selectedServer = CType(dgvServers.SelectedRows(0).DataBoundItem, ServerDisplayInfo).Server
         Dim selectedEvento = CType(dgvEventos.SelectedRows(0).DataBoundItem, EventoRespaldo)
 
         selectedServer.Eventos.Remove(selectedEvento)
