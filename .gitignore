@@ -16,7 +16,6 @@
 
 # Project files
 *.csproj
-*.vbproj
 *.fsproj
 *.sqlproj
 
