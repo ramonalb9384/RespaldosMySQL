@@ -145,16 +145,22 @@ Public Class Form1
         dgvServers.SelectionMode = DataGridViewSelectionMode.FullRowSelect
         dgvServers.MultiSelect = False
 
-        dgvServers.Columns.Add(New DataGridViewTextBoxColumn() With {.DataPropertyName = "Name", .HeaderText = "Nombre", .Width = 150})
-        dgvServers.Columns.Add(New DataGridViewTextBoxColumn() With {.DataPropertyName = "IP", .HeaderText = "IP/Host", .Width = 120})
-        dgvServers.Columns.Add(New DataGridViewTextBoxColumn() With {.DataPropertyName = "Port", .HeaderText = "Puerto", .Width = 60})
-        dgvServers.Columns.Add(New DataGridViewTextBoxColumn() With {.DataPropertyName = "User", .HeaderText = "Usuario", .Width = 100})
+        dgvServers.Columns.Add(New DataGridViewTextBoxColumn() With {.DataPropertyName = "ServerName", .HeaderText = "Nombre Servidor", .Width = 150})
+        dgvServers.Columns.Add(New DataGridViewTextBoxColumn() With {.DataPropertyName = "ServerIP", .HeaderText = "IP/Host", .Width = 120})
+        'dgvServers.Columns.Add(New DataGridViewTextBoxColumn() With {.DataPropertyName = "ServerPort", .HeaderText = "Puerto", .Width = 60})
+        dgvServers.Columns.Add(New DataGridViewTextBoxColumn() With {.DataPropertyName = "ServerUser", .HeaderText = "Usuario", .Width = 100})
+        dgvServers.Columns.Add(New DataGridViewTextBoxColumn() With {.DataPropertyName = "BackupStatusIcon", .HeaderText = "Respaldo Habilitado", .Width = 80, .DefaultCellStyle = New DataGridViewCellStyle() With {.Alignment = DataGridViewContentAlignment.MiddleCenter}})
+        dgvServers.Columns.Add(New DataGridViewTextBoxColumn() With {.DataPropertyName = "UpdateStatusIcon", .HeaderText = "Último Respaldo", .Width = 80, .DefaultCellStyle = New DataGridViewCellStyle() With {.Alignment = DataGridViewContentAlignment.MiddleCenter}})
     End Sub
 
     Private Sub DisplayServers()
         dgvServers.DataSource = Nothing
-        dgvServers.DataSource = servers
-        If servers.Any() Then
+        Dim displayList As New List(Of ServerDisplayInfo)
+        For Each s As Server In servers
+            displayList.Add(New ServerDisplayInfo(s, backupManager))
+        Next
+        dgvServers.DataSource = displayList
+        If displayList.Any() Then
             dgvServers.Rows(0).Selected = True
         End If
     End Sub
@@ -182,7 +188,8 @@ Public Class Form1
             Return
         End If
 
-        Dim selectedServer = CType(dgvServers.SelectedRows(0).DataBoundItem, Server)
+        Dim selectedDisplayInfo = CType(dgvServers.SelectedRows(0).DataBoundItem, ServerDisplayInfo)
+        Dim selectedServer = selectedDisplayInfo.Server
         Dim serverIndex = servers.IndexOf(selectedServer)
 
         Using editorForm As New FormEditorServidor(backupManager, selectedServer)
@@ -527,8 +534,8 @@ Public Class Form1
 
     Private Sub dgvServers_SelectionChanged(sender As Object, e As EventArgs) Handles dgvServers.SelectionChanged
         If dgvServers.SelectedRows.Count > 0 Then
-            Dim selectedServer = CType(dgvServers.SelectedRows(0).DataBoundItem, Server)
-            DisplayEventos(selectedServer)
+            Dim selectedDisplayInfo = CType(dgvServers.SelectedRows(0).DataBoundItem, ServerDisplayInfo)
+            DisplayEventos(selectedDisplayInfo.Server)
         Else
             DisplayEventos(Nothing)
         End If

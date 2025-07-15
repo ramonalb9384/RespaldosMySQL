@@ -11,6 +11,7 @@ Public Class FormSettings
         txtBackupPath.Text = backupManager.BackupDestinationPath
         txtSevenZipPath.Text = backupManager.SevenZipPath
         chkEncryptPasswords.Checked = backupManager.EncryptPasswords
+        chkDeepLogging.Checked = backupManager.DeepLoggingEnabled
     End Sub
 
     Private Sub btnBrowseMySqlDump_Click(sender As Object, e As EventArgs) Handles btnBrowseMySqlDump.Click
@@ -40,6 +41,7 @@ Public Class FormSettings
             backupManager.BackupDestinationPath = txtBackupPath.Text
             backupManager.SevenZipPath = txtSevenZipPath.Text
             backupManager.EncryptPasswords = chkEncryptPasswords.Checked
+            backupManager.DeepLoggingEnabled = chkDeepLogging.Checked
 
 
 

@@ -36,6 +36,7 @@ Partial Class FormSettings
         Me.txtSevenZipPath = New System.Windows.Forms.TextBox()
         Me.btnBrowseSevenZip = New System.Windows.Forms.Button()
         Me.chkEncryptPasswords = New System.Windows.Forms.CheckBox()
+        Me.chkDeepLogging = New System.Windows.Forms.CheckBox()
         Me.SuspendLayout()
         '
         'Label1
@@ -51,7 +52,7 @@ Partial Class FormSettings
         'txtMySqlDumpPath
         '
         Me.txtMySqlDumpPath.Location = New System.Drawing.Point(165, 15)
-        Me.txtMySqlDumpPath.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.txtMySqlDumpPath.Margin = New System.Windows.Forms.Padding(4)
         Me.txtMySqlDumpPath.Name = "txtMySqlDumpPath"
         Me.txtMySqlDumpPath.Size = New System.Drawing.Size(372, 22)
         Me.txtMySqlDumpPath.TabIndex = 1
@@ -59,7 +60,7 @@ Partial Class FormSettings
         'btnBrowseMySqlDump
         '
         Me.btnBrowseMySqlDump.Location = New System.Drawing.Point(547, 12)
-        Me.btnBrowseMySqlDump.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnBrowseMySqlDump.Margin = New System.Windows.Forms.Padding(4)
         Me.btnBrowseMySqlDump.Name = "btnBrowseMySqlDump"
         Me.btnBrowseMySqlDump.Size = New System.Drawing.Size(100, 28)
         Me.btnBrowseMySqlDump.TabIndex = 2
@@ -69,7 +70,7 @@ Partial Class FormSettings
         'btnBrowseBackupPath
         '
         Me.btnBrowseBackupPath.Location = New System.Drawing.Point(547, 60)
-        Me.btnBrowseBackupPath.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnBrowseBackupPath.Margin = New System.Windows.Forms.Padding(4)
         Me.btnBrowseBackupPath.Name = "btnBrowseBackupPath"
         Me.btnBrowseBackupPath.Size = New System.Drawing.Size(100, 28)
         Me.btnBrowseBackupPath.TabIndex = 5
@@ -79,7 +80,7 @@ Partial Class FormSettings
         'txtBackupPath
         '
         Me.txtBackupPath.Location = New System.Drawing.Point(165, 63)
-        Me.txtBackupPath.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.txtBackupPath.Margin = New System.Windows.Forms.Padding(4)
         Me.txtBackupPath.Name = "txtBackupPath"
         Me.txtBackupPath.Size = New System.Drawing.Size(372, 22)
         Me.txtBackupPath.TabIndex = 4
@@ -96,8 +97,8 @@ Partial Class FormSettings
         '
         'btnSave
         '
-        Me.btnSave.Location = New System.Drawing.Point(439, 164)
-        Me.btnSave.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnSave.Location = New System.Drawing.Point(439, 230)
+        Me.btnSave.Margin = New System.Windows.Forms.Padding(4)
         Me.btnSave.Name = "btnSave"
         Me.btnSave.Size = New System.Drawing.Size(100, 28)
         Me.btnSave.TabIndex = 9
@@ -107,8 +108,8 @@ Partial Class FormSettings
         'btnCancel
         '
         Me.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel
-        Me.btnCancel.Location = New System.Drawing.Point(547, 164)
-        Me.btnCancel.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnCancel.Location = New System.Drawing.Point(547, 230)
+        Me.btnCancel.Margin = New System.Windows.Forms.Padding(4)
         Me.btnCancel.Name = "btnCancel"
         Me.btnCancel.Size = New System.Drawing.Size(100, 28)
         Me.btnCancel.TabIndex = 10
@@ -138,7 +139,7 @@ Partial Class FormSettings
         'txtSevenZipPath
         '
         Me.txtSevenZipPath.Location = New System.Drawing.Point(165, 111)
-        Me.txtSevenZipPath.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.txtSevenZipPath.Margin = New System.Windows.Forms.Padding(4)
         Me.txtSevenZipPath.Name = "txtSevenZipPath"
         Me.txtSevenZipPath.Size = New System.Drawing.Size(372, 22)
         Me.txtSevenZipPath.TabIndex = 7
@@ -146,7 +147,7 @@ Partial Class FormSettings
         'btnBrowseSevenZip
         '
         Me.btnBrowseSevenZip.Location = New System.Drawing.Point(547, 108)
-        Me.btnBrowseSevenZip.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.btnBrowseSevenZip.Margin = New System.Windows.Forms.Padding(4)
         Me.btnBrowseSevenZip.Name = "btnBrowseSevenZip"
         Me.btnBrowseSevenZip.Size = New System.Drawing.Size(100, 28)
         Me.btnBrowseSevenZip.TabIndex = 8
@@ -163,13 +164,24 @@ Partial Class FormSettings
         Me.chkEncryptPasswords.Text = "Encriptar contraseñas de los servidores (Recomendado)"
         Me.chkEncryptPasswords.UseVisualStyleBackColor = True
         '
+        'chkDeepLogging
+        '
+        Me.chkDeepLogging.AutoSize = True
+        Me.chkDeepLogging.Location = New System.Drawing.Point(19, 181)
+        Me.chkDeepLogging.Name = "chkDeepLogging"
+        Me.chkDeepLogging.Size = New System.Drawing.Size(205, 20)
+        Me.chkDeepLogging.TabIndex = 12
+        Me.chkDeepLogging.Text = "Activar modo de log profundo"
+        Me.chkDeepLogging.UseVisualStyleBackColor = True
+        '
         'FormSettings
         '
         Me.AcceptButton = Me.btnSave
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.CancelButton = Me.btnCancel
-        Me.ClientSize = New System.Drawing.Size(663, 209)
+        Me.ClientSize = New System.Drawing.Size(663, 271)
+        Me.Controls.Add(Me.chkDeepLogging)
         Me.Controls.Add(Me.chkEncryptPasswords)
         Me.Controls.Add(Me.btnBrowseSevenZip)
         Me.Controls.Add(Me.txtSevenZipPath)
@@ -183,7 +195,7 @@ Partial Class FormSettings
         Me.Controls.Add(Me.txtMySqlDumpPath)
         Me.Controls.Add(Me.Label1)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog
-        Me.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.Margin = New System.Windows.Forms.Padding(4)
         Me.MaximizeBox = False
         Me.MinimizeBox = False
         Me.Name = "FormSettings"
@@ -208,4 +220,5 @@ Partial Class FormSettings
     Friend WithEvents txtSevenZipPath As TextBox
     Friend WithEvents btnBrowseSevenZip As Button
     Friend WithEvents chkEncryptPasswords As CheckBox
+    Friend WithEvents chkDeepLogging As CheckBox
 End Class

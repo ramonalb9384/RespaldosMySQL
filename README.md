@@ -26,6 +26,10 @@
 *   **Detección y Ejecución de Respaldos Omitidos**: El servicio detecta si un respaldo programado se omitió (por ejemplo, si el servidor estuvo apagado) y lo ejecuta automáticamente al iniciar, respetando una ventana de no respaldo configurable.
 *   **Ventana de No Respaldo**: Permite definir un horario durante el cual los respaldos omitidos no se ejecutarán, evitando así la sobrecarga del sistema en horas críticas.
 *   **Arquitectura Optimizada**: Lógica de gestión de servidores consolidada en `BackupManager` para una mayor eficiencia y mantenibilidad.
+*   **Modo de Log Profundo**: Una opción configurable en la UI que, al activarse, genera un archivo de log separado (`LOG_DEEP_YYYYMMDD.txt`) con información extremadamente detallada sobre la ejecución del servicio, ideal para depuración. El log normal (`LOG_YYYYMMDD.txt`) sigue registrando eventos importantes.
+*   **Indicadores Visuales de Respaldo en UI**: El DataGridView principal ahora muestra dos nuevas columnas con iconos (✓ o ✗) para indicar:
+    *   Si el respaldo está habilitado para un servidor.
+    *   Si el último respaldo de ese servidor se realizó correctamente y está actualizado.
 
 ## Tecnologías Utilizadas
 
@@ -88,6 +92,7 @@ Antes de compilar y ejecutar la aplicación, asegúrate de tener instalado lo si
     *   Gestiona el ciclo de vida del servicio de Windows (Instalar, Desinstalar, Iniciar, Detener).
 *   **Log de Actividad**:
     *   Monitorea el log del servicio en tiempo real.
+*   **Modo de Log Profundo**: Activa esta opción en la ventana de configuración para generar logs extremadamente detallados del servicio, útiles para depuración.
 
 ## Notificaciones con ntfy.sh
 
@@ -95,7 +100,7 @@ La aplicación se integra con el servicio de notificaciones push de código abie
 
 ### ¿Cómo funciona?
 
-1.  **Instala ntfy**: Descarga la aplicación de ntfy para [Android](https://play.google.com/store/apps/details?id=io.heckel.ntfy) o [iOS](https://apps.apple.com/us/app/ntfy/id1625396347).
+1.  **Instala ntfy**: Descarga la aplicación de ntfy para [Android](https://play.google.com/ntfy) o [iOS](https://apps.apple.com/us/app/ntfy/id1625396347).
 2.  **Suscríbete a un tema**: En la aplicación móvil, suscríbete a un "tema" (topic). Este es un nombre secreto que solo tú conocerás (ej: `respaldos-de-mi-empresa-123`).
 3.  **Configura en la UI**:
     *   En `RespaldosMysqlUI`, edita un servidor.
