@@ -65,6 +65,12 @@ Public Class Form1
             lblProgressStatus.Text = statusData.Status
             ProgressBar1.Visible = True
             lblProgressStatus.Visible = True
+
+            If statusData.Progress >= 100 OrElse statusData.Status.ToLower().Contains("error") Then
+                System.Threading.Thread.Sleep(5000)
+                ProgressReporter.ClearStatus()
+            End If
+
         Else
             ProgressBar1.Visible = False
             lblProgressStatus.Visible = False
